@@ -1,0 +1,41 @@
+{
+  "expo": {
+    "name": "Object Sketch",
+    "slug": "object-sketch",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.objectsketch.app",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "앱이 카메라에 접근하여 사진을 촬영하고 스케치로 변환합니다."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "aed9d31e-558b-43ec-9491-a684f02f9694"
+      }
+    }
+  }
+}

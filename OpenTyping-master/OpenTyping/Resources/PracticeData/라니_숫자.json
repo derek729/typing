@@ -1,0 +1,12 @@
+{
+  "Name": "라니와 함께하는 숫자 타자",
+  "Author": "OpenTyping",
+  "TextData": [
+    "하나", "둘", "셋", "넷", "다섯", "여섯", "일곱", "여덟", "아홉", "열"
+  ],
+  "Character": "Korean",
+  "Image": "lani.png",
+  "BackgroundColor": "#FFF3E0",
+  "Compliments": ["라니가 힘을 줘요!", "멋져요!", "정확해요!", "최고예요!"],
+  "RewardIcon": "star.png"
+} 

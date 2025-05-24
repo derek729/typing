@@ -1,0 +1,12 @@
+{
+  "Name": "기니와 함께하는 과일 타자",
+  "Author": "OpenTyping",
+  "TextData": [
+    "사과", "바나나", "포도", "딸기", "수박", "참외", "오렌지", "복숭아", "자두", "귤"
+  ],
+  "Character": "Korean",
+  "Image": "gini.png",
+  "BackgroundColor": "#FFF9C4",
+  "Compliments": ["정말 잘했어요!", "기니가 칭찬해요!", "멋진 타자!", "최고예요!"],
+  "RewardIcon": "star.png"
+} 
