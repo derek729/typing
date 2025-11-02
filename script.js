@@ -1742,3 +1742,336 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+
+// AI 챗봇 매니저
+class ChatBotManager {
+    constructor() {
+        this.isOpen = false;
+        this.messageHistory = [];
+        this.quickReplies = [
+            '🎯 올바른 자세 알려줘',
+            '⚡ 속도 향상 방법',
+            '🎮 연습 시작하기',
+            '📊 현재 실력 분석',
+            '🏆 추천 연습',
+            '❓ 자주 묻는 질문'
+        ];
+
+        this.responseTemplates = {
+            '자세': [
+                '👍 좋은 질문입니다! 올바른 자세는 다음과 같습니다:\n\n🪑 허리를 바르게 펴고 의자 깊숙이 앉으세요\n👀 모니터는 눈높이에서 15-20도 아래\n✋ 손목은 자연스럽게 유지\n🦶 발은 바닥에 평평하게 놓으세요\n\n이 자세를 유지하면 장시간 연습해도 피로가 덜합니다!',
+                '🪑 자세 교정이 중요합니다:\n\n1. 등과 허리는 의자에 붙이세요\n2. 어깨는 힘 빼고 자연스럽게\n3. 팔꿈치는 90도 각도 유지\n4. 손가락은 키보드 위에서 자연스러운 곡선\n\n30분마다 스트레칭하는 것도 잊지 마세요!'
+            ],
+            '속도': [
+                '⚡ 속도 향상을 위한 팁들입니다:\n\n🎯 정확도부터 확실하게!\n🔤 자음 모음 연습을 꾸준히\n⌨️ 홈키 위치 기억하기\n📈 점진적으로 속도 높이기\n\n현재 속도는 얼마인가요? 맞춤형 조언을 드릴 수 있어요!',
+                '🚀 속도 향상의 비결:\n\n1️⃣ 매일 15분 꾸준히 연습\n2️⃣ 암기 타이핑으로 자유로워지기\n3️⃣ 긴 글 연습으로 지구력 키우기\n4️⃣ 손가락 독립성 운동\n\n목표 속도를 설정하시면 구체적인 계획을 세워드릴게요!'
+            ],
+            '연습': [
+                '🎮 지금 바로 연습을 시작해볼까요?\n\n📝 기초 연습: a s d f j k l;\n🔤 알파벳 연습: 영문 단어 타이핑\n📞 숫자 연습: 전화번호 입력 연습\n💻 프로그래밍: 코드 타이핑 연습\n\n어떤 종류의 연습을 원하시나요?',
+                '🎯 맞춤형 연습 계획:\n\n🔥 5분 워밍업: 기본 자세 연습\n💪 15분 본 연습: 목표 과제 수행\n🧊 5분 마무리: 복습 및 정리\n\n지금 바로 연습 페이지로 이동할까요?'
+            ],
+            '분석': [
+                '📊 현재 실력을 분석해볼까요?\n\n⌨️ WPM: 현재 분당 타자 속도\n🎯 정확도: 오타율 및 정확도\n📈 추세: 최근 성장 그래프\n🏆 랭킹: 다른 사용자와 비교\n\n통계 페이지에서 자세히 확인해보세요!',
+                '📈 개인 맞춤 분석:\n\n✅ 강점: 잘하는 부분 확인\n❌ 약점: 개선이 필요한 부분\n🎯 목표: 다음 달 목표 설정\n📅 계획: 주간 학습 계획\n\n지금 바로 분석을 시작할까요?'
+            ],
+            '추천': [
+                '🏆 현재 실력에 맞는 추천:\n\n🌱 초급: a s d f j k l; 기초 연습\n🌿 중급: 짧은 문장 타이핑\n🌳 고급: 장문과 전문 용어\n🚀 전문가: 코드와 기호 연습\n\n현재 레벨을 알려주시면 더 정확한 추천을 드릴게요!',
+                '🎯 오늘의 추천 코스:\n\n📚 [기초] 손가락 위치 익히기 (10분)\n⚡ [속도] 빠른 반복 연습 (15분)\n🎯 [정확도] 집중 타이핑 (10분)\n🔄 [복습] 전체 내용 복습 (5분)\n\n바로 시작해볼까요?'
+            ]
+        };
+
+        this.initializeChatBot();
+    }
+
+    initializeChatBot() {
+        // 챗봇 토글 버튼
+        const toggleBtn = document.getElementById('chatBotToggle');
+        const closeBtn = document.getElementById('closeChatBot');
+        const chatWindow = document.getElementById('chatBotWindow');
+        const input = document.getElementById('chatBotInput');
+        const sendBtn = document.getElementById('chatBotSend');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggleChatBot());
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeChatBot());
+        }
+
+        if (sendBtn) {
+            sendBtn.addEventListener('click', () => this.sendMessage());
+        }
+
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.sendMessage();
+                }
+            });
+        }
+
+        // 퀵 리플리 버튼들
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('chat-quick-reply')) {
+                const message = e.target.textContent.trim();
+                input.value = message;
+                this.sendMessage();
+            }
+        });
+    }
+
+    toggleChatBot() {
+        const chatWindow = document.getElementById('chatBotWindow');
+        const badge = document.getElementById('chatBotBadge');
+
+        if (this.isOpen) {
+            this.closeChatBot();
+        } else {
+            this.openChatBot();
+        }
+    }
+
+    openChatBot() {
+        const chatWindow = document.getElementById('chatBotWindow');
+        const badge = document.getElementById('chatBotBadge');
+
+        chatWindow.classList.remove('hidden');
+        this.isOpen = true;
+        badge.style.display = 'none';
+
+        // 입력 필드에 포커스
+        setTimeout(() => {
+            document.getElementById('chatBotInput').focus();
+        }, 300);
+    }
+
+    closeChatBot() {
+        const chatWindow = document.getElementById('chatBotWindow');
+
+        chatWindow.classList.add('hidden');
+        this.isOpen = false;
+    }
+
+    sendMessage() {
+        const input = document.getElementById('chatBotInput');
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        // 사용자 메시지 추가
+        this.addMessage(message, 'user');
+
+        // 입력 필드 비우기
+        input.value = '';
+
+        // 챗봇 응답 생성
+        this.generateResponse(message);
+    }
+
+    addMessage(message, sender = 'bot') {
+        const messagesContainer = document.getElementById('chatBotMessages');
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flex items-start space-x-2 ${sender === 'user' ? 'justify-end' : ''}`;
+
+        if (sender === 'user') {
+            messageDiv.innerHTML = `
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl p-3 shadow-sm max-w-[80%]">
+                    <p class="text-sm">${message}</p>
+                </div>
+                <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-user text-gray-600 text-sm"></i>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="bg-white rounded-xl p-3 shadow-sm max-w-[80%]">
+                    <p class="text-sm text-gray-800 whitespace-pre-line">${message}</p>
+                </div>
+            `;
+        }
+
+        messagesContainer.appendChild(messageDiv);
+
+        // 스크롤 하단으로
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // 메시지 기록
+        this.messageHistory.push({ message, sender, timestamp: Date.now() });
+    }
+
+    generateResponse(userMessage) {
+        const lowerMessage = userMessage.toLowerCase();
+
+        // 타이핑 상태 분석 후 응답
+        const typingStats = this.analyzeTypingStats();
+        const contextualResponse = this.getContextualResponse(lowerMessage, typingStats);
+
+        // 응답 지연 (자연스러운 대화를 위해)
+        setTimeout(() => {
+            this.addMessage(contextualResponse, 'bot');
+
+            // 추가 퀵 리플리 제공
+            this.showQuickReplies();
+        }, 800 + Math.random() * 700);
+    }
+
+    analyzeTypingStats() {
+        // 현재 타이핑 세션 상태 분석
+        const session = AppState.currentSession;
+
+        return {
+            wpm: session.wpm || 0,
+            accuracy: session.accuracy || 0,
+            errors: session.incorrectChars || 0,
+            timeElapsed: session.startTime ? Date.now() - session.startTime : 0,
+            isPracticing: session.startTime !== null
+        };
+    }
+
+    getContextualResponse(message, stats) {
+        // 기본 응답 로직
+        if (message.includes('자세') || message.includes('자리')) {
+            return this.getRandomResponse('자세');
+        }
+
+        if (message.includes('속도') || message.includes('빠르') || message.includes('wpm')) {
+            return this.getRandomResponse('속도');
+        }
+
+        if (message.includes('연습') || message.includes('시작') || message.includes('practice')) {
+            return this.getRandomResponse('연습');
+        }
+
+        if (message.includes('분석') || message.includes('실력') || message.includes('통계')) {
+            return this.getRandomResponse('분석');
+        }
+
+        if (message.includes('추천') || message.includes('추천')) {
+            return this.getRandomResponse('추천');
+        }
+
+        // 타이핑 중인 상태에 따른 응답
+        if (stats.isPracticing) {
+            if (stats.errors > 5) {
+                return `💪 현재 오타가 ${stats.errors}개 있네요. 천천히 정확하게 타이핑하는 것에 집중해보세요! 정확도가 속도보다 중요해요.`;
+            }
+
+            if (stats.wpm > 60) {
+                return `🚀 현재 ${stats.wpm}WPM으로 잘하고 있어요! 현재 속도를 유지하면서 정확도를 높이는 데 집중해보세요.`;
+            }
+
+            return `🎯 현재 ${stats.wpm}WPM, 정확도 ${stats.accuracy}%입니다. 꾸준히 연습하면 분명 발전할 수 있어요!`;
+        }
+
+        // 기본 응답
+        const defaultResponses = [
+            '🤔 좋은 질문이에요! 더 구체적으로 말씀해주시면 자세히 도와드릴게요.',
+            '📚 타자 연습에 대해 궁금한 점을 알려주세요. 최고의 코칭을 제공해드릴게요!',
+            '🎯 목표를 설정하고 그에 맞는 연습을 추천해드릴 수 있어요. 어떤 목표가 있으신가요?',
+            '💪 매일 꾸준히 하는 것이 중요해요. 오늘의 목표를 함께 정해볼까요?'
+        ];
+
+        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+    }
+
+    getRandomResponse(category) {
+        const responses = this.responseTemplates[category];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+    showQuickReplies() {
+        const messagesContainer = document.getElementById('chatBotMessages');
+        const replies = ['🎮 연습 시작하기', '📊 실력 확인하기', '⚡ 팁 더 보기'];
+
+        const repliesDiv = document.createElement('div');
+        repliesDiv.className = 'flex flex-wrap gap-2 mt-3';
+
+        replies.forEach(reply => {
+            const btn = document.createElement('button');
+            btn.className = 'chat-quick-reply text-xs bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full hover:bg-indigo-200 transition';
+            btn.textContent = reply;
+            repliesDiv.appendChild(btn);
+        });
+
+        messagesContainer.appendChild(repliesDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // 타이핑 코칭 알림
+    showTypingTip() {
+        const tips = [
+            '💡 팁: 손가락을 키보드 위에서 자연스럽게 유지하세요',
+            '🎯 목표: 정확도를 먼저 높이고 속도를 높이세요',
+            '🔥 집중: 화면을 보지 말고 손가락 움직임에 집중하세요',
+            '⚡ 효율: 짧게 자주 연습하는 것보다 길게 집중하는 것이 좋아요',
+            '🏆 성공: 어제보다 5%만 나아져도 성공입니다!'
+        ];
+
+        const tip = tips[Math.floor(Math.random() * tips.length)];
+
+        // 뱃지 업데이트
+        const badge = document.getElementById('chatBotBadge');
+        badge.textContent = '💡';
+        badge.style.display = 'flex';
+
+        // 챗봇 열린 경우 메시지 표시
+        if (this.isOpen) {
+            this.addMessage(tip, 'bot');
+        }
+    }
+
+    // 실시간 타이핑 피드백
+    provideRealTimeFeedback(typedChar, expectedChar, isCorrect) {
+        if (!this.isOpen) return;
+
+        if (!isCorrect) {
+            const feedbacks = [
+                '👆 잘못된 키입니다. 홈키 위치를 확인하세요',
+                '🎯 천천히 정확하게 타이핑해주세요',
+                '💪 손가락 위치를 다시 확인해보세요'
+            ];
+
+            // 오타가 연속으로 3개 이상일 때만 피드백
+            const recentErrors = this.getRecentErrors();
+            if (recentErrors >= 3) {
+                const feedback = feedbacks[Math.floor(Math.random() * feedbacks.length)];
+                this.addMessage(feedback, 'bot');
+            }
+        }
+    }
+
+    getRecentErrors() {
+        // 최근 오타 개수 계산 (구현 필요)
+        return 0;
+    }
+}
+
+// 전역 챗봇 인스턴스
+let chatBotManager;
+
+// 챗봇 관련 전역 함수
+function toggleChatBot() {
+    if (chatBotManager) {
+        chatBotManager.toggleChatBot();
+    }
+}
+
+// DOM 로드 시 챗봇 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    // 기존 초기화 코드...
+
+    // 챗봇 초기화
+    chatBotManager = new ChatBotManager();
+
+    // 주기적으로 타이핑 팁 보여주기
+    setInterval(() => {
+        if (chatBotManager && Math.random() < 0.1) { // 10% 확률로 팁 보여주기
+            chatBotManager.showTypingTip();
+        }
+    }, 60000); // 1분마다 확인
+});
