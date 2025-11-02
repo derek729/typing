@@ -2,1328 +2,1895 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUESTION - AI 사물 스케치 &amp; 이름 찾기</title>
-
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="한컴 타자 스타일 온라인 타자 연습 프로그램 - 속도와 정확도를 동시에! 모바일 최적화, 오프라인 지원">
+    <meta name="keywords" content="타자, 타자연습, 온라인타자, 한컴타자, 손가락연습, WPM, 타수, 키보드연습, 모바일">
+    <meta name="author" content="OpenTyping Pro Team">
     <meta name="theme-color" content="#4F46E5">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="QUESTION">
-    <link rel="apple-touch-icon" href="img/icons/question_icon_192.png">
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0" as="script">
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.0.0" as="script">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" as="style">
-    
-    <!-- Load styles -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Load scripts with defer -->
-    <script src="https://cdn.tailwindcss.com" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.0.0" defer></script>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="OpenTyping">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="OpenTyping Pro">
+    <meta name="msapplication-TileColor" content="#4F46E5">
+    <meta name="msapplication-navbutton-color" content="#4F46E5">
+    <meta name="msapplication-starturl" content="/">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="OpenTyping Pro - 전문 타자 연습 플랫폼">
+    <meta property="og:description" content="한컴 타자 스타일 온라인 타자 연습 프로그램">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="/assets/icon.png">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/assets/icon.png">
+    <link rel="icon" type="image/svg+xml" href="/assets/icon.png">
+
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+    <!-- Stylesheets -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
 
     <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #3730A3;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --danger: #EF4444;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background: var(--light);
+            overflow-x: hidden;
         }
-        .hero-bg {
-            background-image: linear-gradient(to right, #4F46E5, #7C3AED); /* Indigo to Purple */
+
+        /* 커스텀 스크롤바 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
-        .feature-card {
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
         }
-        .cta-button {
-            transition: background-color 0.3s ease;
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
-        .screenshot-container {
-            display: flex;
-            flex-wrap: nowrap; /* 한 줄로 가로 스크롤 */
-            justify-content: flex-start;
-            gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 1rem; /* 스크롤바 영역 확보 (선택적) */
+
+        /* 애니메이션 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .screenshot-item {
-            flex: 0 0 auto;
-            width: 240px; /* 기본 너비, 반응형에서 조정 가능 */
-            max-width: 280px;
-            min-width: 200px;
-            aspect-ratio: 9 / 16;
-            object-fit: cover;
-            border-radius: 0.75rem;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-        @media (max-width: 1024px) {
-            .screenshot-item {
-                width: 220px; /* 태블릿 크기에서의 너비 예시 */
-            }
-        }
-        @media (max-width: 640px) {
-            .screenshot-item {
-                width: 200px; /* 모바일 크기에서의 너비 예시 */
-            }
-        }
-        .navbar-logo {
-            height: 40px;
-            width: auto;
-            border-radius: 8px;
-        }
-        .social-login-button {
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .social-login-button:hover {
-            transform: translateY(-2px);
-        }
-        /* PWA 설치 배너 스타일 */
-        #install-banner {
-            animation: slideUp 0.5s ease-out;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        /* 로딩 스피너 스타일 */
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #4F46E5;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* 토스트 메시지 스타일 */
-        .toast {
-            position: fixed;
-            bottom: 1rem;
-            right: 1rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            color: white;
-            font-weight: 500;
-            z-index: 50;
-            animation: slideIn 0.3s ease-out;
-        }
+
         @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
         }
-        .toast-success {
-            background-color: #10B981;
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
-        .toast-error {
-            background-color: #EF4444;
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(79, 70, 229, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(79, 70, 229, 0.8); }
         }
-        .toast-info {
-            background-color: #3B82F6;
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
-        /* 버튼 로딩 상태 스타일 */
-        .button-loading {
+
+        .animate-fade-in { animation: fadeIn 0.6s ease-out; }
+        .animate-slide-in { animation: slideIn 0.8s ease-out; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .animate-glow { animation: glow 2s infinite; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+
+        /* 키보드 스타일 */
+        .keyboard-key {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             position: relative;
-            color: transparent !important;
+            overflow: hidden;
         }
-        .button-loading::after {
+
+        .keyboard-key::before {
             content: '';
             position: absolute;
-            width: 20px;
-            height: 20px;
             top: 50%;
             left: 50%;
-            margin: -10px 0 0 -10px;
-            border: 2px solid #ffffff;
-            border-top-color: transparent;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .keyboard-key:active,
+        .keyboard-key.active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            background: var(--primary) !important;
+            color: white !important;
+        }
+
+        .keyboard-key:active::before,
+        .keyboard-key.active::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 타이핑 텍스트 스타일 */
+        .typing-text {
+            font-size: 28px;
+            line-height: 1.8;
+            letter-spacing: 0.05em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .correct-char {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .incorrect-char {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+            animation: shake 0.5s ease-out;
+        }
+
+        .current-char {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 4px;
+            animation: blink 1s infinite;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.7; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 카드 스타일 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .gradient-card {
+            background: var(--gradient);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* 버튼 스타일 */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        /* 통계 카드 */
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 배지 스타일 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: scale(1.05);
+        }
+
+        .badge-gold {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+        }
+
+        .badge-silver {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+            color: white;
+        }
+
+        .badge-bronze {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+            color: white;
+        }
+
+        /* 로딩 스피너 */
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary);
             border-radius: 50%;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 툴팁 */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::before {
+            opacity: 1;
+        }
+
+        /* 프로그레스 바 */
+        .progress-bar {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        /* 헤로 섹션 */
+        .hero-section {
+            background: var(--gradient);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,96C1248,96,1344,128,1392,144L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+        }
+
+        /* 리더보드 */
+        .leaderboard-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .leaderboard-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); color: white; }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%); color: white; }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%); color: white; }
+
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .typing-text {
+                font-size: 18px;
+                line-height: 1.8;
+                letter-spacing: 0.02em;
+                word-break: break-all;
+            }
+
+            .stat-card {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+
+            .hero-section {
+                padding: 60px 20px 40px;
+            }
+
+            .hero-section h2 {
+                font-size: 32px;
+                line-height: 1.3;
+            }
+
+            .hero-section p {
+                font-size: 16px;
+                margin-bottom: 24px;
+            }
+
+            /* 모바일 네비게이션 */
+            header {
+                padding: 12px 16px;
+            }
+
+            .nav-btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            /* 모바일 카드 */
+            .glass-card, .stat-card {
+                border-radius: 12px;
+                margin-bottom: 16px;
+            }
+
+            /* 모바일 버튼 */
+            .btn-primary, .btn-secondary {
+                padding: 16px 24px;
+                font-size: 16px;
+                border-radius: 16px;
+                width: 100%;
+                margin-bottom: 12px;
+            }
+
+            /* 모바일 키보드 */
+            .keyboard-key {
+                min-height: 44px;
+                font-size: 12px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            /* 모바일 입력 필드 */
+            #practiceInput {
+                font-size: 18px;
+                padding: 16px;
+                border-radius: 12px;
+                min-height: 60px;
+            }
+
+            /* 모바일 모달 */
+            .modal-content {
+                margin: 20px;
+                padding: 24px;
+                border-radius: 16px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            /* 모바일 텍스트 */
+            .text-5xl { font-size: 2.5rem; }
+            .text-4xl { font-size: 2rem; }
+            .text-3xl { font-size: 1.75rem; }
+            .text-2xl { font-size: 1.5rem; }
+            .text-xl { font-size: 1.25rem; }
+
+            /* 모바일 그리드 */
+            .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+            .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
+            .grid-cols-2 { grid-template-columns: 1fr; }
+
+            /* 모바일 숨김/표시 */
+            .hidden-mobile { display: none !important; }
+            .show-mobile { display: block !important; }
+
+            /* 모바일 터치 영역 확장 */
+            .touch-target {
+                min-height: 44px;
+                min-width: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* 모바일 스크롤 개선 */
+            * {
+                -webkit-overflow-scrolling: touch;
+            }
+
+            body {
+                overscroll-behavior-y: contain;
+            }
+        }
+
+        /* 더 작은 화면 (아이폰 SE 등) */
+        @media (max-width: 375px) {
+            .typing-text { font-size: 16px; }
+            .hero-section h2 { font-size: 28px; }
+            .keyboard-key {
+                font-size: 11px;
+                padding: 8px 12px;
+            }
+            .stat-card { padding: 12px; }
+        }
+
+        /* 태블릿 최적화 */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .typing-text { font-size: 22px; }
+            .hero-section { padding: 80px 40px 60px; }
+            .grid-cols-4 { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* 모바일 가로 모드 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .hero-section {
+                padding: 40px 20px;
+                min-height: auto;
+            }
+            .hero-section h2 { font-size: 24px; }
+            .typing-text { font-size: 16px; }
+            .keyboard-key { min-height: 36px; }
+        }
+
+        /* 키보드 열림 상태 */
+        body.keyboard-open {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        body.keyboard-open .practice-area {
+            padding-bottom: 0;
+        }
+
+        body.keyboard-open #practiceInput {
+            position: relative;
+            z-index: 100;
+        }
+
+        /* PWA Standalone 모드 최적화 */
+        body.pwa-standalone {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        body.pwa-standalone header {
+            padding-top: calc(12px + env(safe-area-inset-top));
+        }
+
+        body.pwa-standalone .modal-content {
+            margin: calc(20px + env(safe-area-inset-top)) 20px 20px;
+        }
+
+        /* 모바일 디바이스 특화 */
+        body.mobile-device {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body.mobile-device .keyboard-key {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        /* 터치 피드백 */
+        body.mobile-device .btn-primary:active,
+        body.mobile-device .btn-secondary:active,
+        body.mobile-device .keyboard-key:active {
+            transform: scale(0.95);
+            transition: transform 0.1s ease;
+        }
+
+        /* 다크 모드 */
+        body.dark-mode {
+            background: var(--dark);
+            color: white;
+        }
+
+        body.dark-mode .glass-card {
+            background: rgba(31, 41, 55, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .stat-card {
+            background: rgba(31, 41, 55, 0.9);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 순위 애니메이션 */
+        @keyframes rankSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .rank-animation {
+            animation: rankSlide 0.5s ease-out;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
+    <!-- 헤더 -->
+    <header class="glass-card sticky top-0 z-50 animate-fade-in">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg animate-pulse">
+                            OT
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse"></div>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            OpenTyping Pro
+                        </h1>
+                        <p class="text-sm text-gray-600">전문 타자 연습 플랫폼</p>
+                    </div>
+                </div>
 
-    <div id="offline-indicator" class="hidden fixed top-0 left-0 right-0 p-3 bg-gray-700 text-white text-center z-[9999] text-sm transition-opacity duration-300">
-        현재 오프라인 상태입니다. 일부 기능이 제한될 수 있습니다.
-    </div>
+                <nav class="hidden lg:flex items-center space-x-6">
+                    <button onclick="showSection('dashboard')" class="nav-btn text-gray-700 hover:text-indigo-600 font-medium transition">
+                        <i class="fas fa-home mr-2"></i>대시보드
+                    </button>
+                    <button onclick="showSection('practice')" class="nav-btn text-gray-700 hover:text-indigo-600 font-medium transition">
+                        <i class="fas fa-graduation-cap mr-2"></i>연습 모드
+                    </button>
+                    <button onclick="showSection('tournaments')" class="nav-btn text-gray-700 hover:text-indigo-600 font-medium transition">
+                        <i class="fas fa-trophy mr-2"></i>토너먼트
+                    </button>
+                    <button onclick="showSection('events')" class="nav-btn text-gray-700 hover:text-indigo-600 font-medium transition">
+                        <i class="fas fa-calendar-alt mr-2"></i>이벤트
+                    </button>
+                    <button onclick="showSection('community')" class="nav-btn text-gray-700 hover:text-indigo-600 font-medium transition">
+                        <i class="fas fa-users mr-2"></i>커뮤니티
+                    </button>
+                    <button onclick="showSection('analytics')" class="nav-btn text-gray-700 hover:text-indigo-600 font-medium transition">
+                        <i class="fas fa-chart-line mr-2"></i>분석
+                    </button>
+                </nav>
 
-    <div id="install-banner" class="hidden fixed bottom-0 left-0 right-0 mb-4 mx-4 p-4 bg-indigo-600 text-white rounded-lg shadow-xl z-[9998] flex flex-col sm:flex-row justify-between items-center">
-        <span class="text-sm sm:text-base mb-2 sm:mb-0">QUESTION 앱을 홈 화면에 추가하고 더 편리하게 사용하세요!</span>
-        <button id="install-button" class="bg-white text-indigo-700 font-semibold px-4 py-2 rounded-md hover:bg-gray-100 text-sm whitespace-nowrap">앱 설치하기</button>
-    </div>
-
-    <nav class="bg-white shadow-md fixed w-full z-10 top-0">
-        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="#" class="flex items-center">
-                <img src="img/simbol.jpg" alt="QUESTION 앱 로고" class="navbar-logo mr-3">
-                <span class="text-2xl font-bold text-indigo-600 hidden sm:inline">QUESTION</span>
-            </a>
-            <div class="hidden md:flex space-x-4 items-center">
-                <a href="#features" class="text-gray-600 hover:text-indigo-600">주요 기능</a>
-                <a href="#how-it-works" class="text-gray-600 hover:text-indigo-600">사용 방법</a>
-                <a href="#preview" class="text-gray-600 hover:text-indigo-600">앱 미리보기</a>
-                <a href="#signup" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 cta-button">회원가입 / 시작하기</a>
+                <div class="flex items-center space-x-4">
+                    <button onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-indigo-600 transition">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    <button onclick="toggleTheme()" class="p-2 text-gray-600 hover:text-indigo-600 transition">
+                        <i class="fas fa-moon text-xl" id="themeIcon"></i>
+                    </button>
+                    <button onclick="showUserProfile()" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition">
+                        <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                            U
+                        </div>
+                        <span class="hidden md:block font-medium">사용자</span>
+                    </button>
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-gray-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
             </div>
-            <div class="md:hidden">
-                <button id="mobile-menu-button" class="text-gray-600 focus:outline-none" aria-expanded="false" aria-controls="mobile-menu">
-                    <i id="mobile-menu-icon" class="fas fa-bars text-2xl" aria-label="메뉴 열기"></i>
-                </button>
-            </div>
-        </div>
-        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg">
-            <a href="#features" class="block px-6 py-3 text-gray-600 hover:bg-indigo-50">주요 기능</a>
-            <a href="#how-it-works" class="block px-6 py-3 text-gray-600 hover:bg-indigo-50">사용 방법</a>
-            <a href="#preview" class="block px-6 py-3 text-gray-600 hover:bg-indigo-50">앱 미리보기</a>
-            <a href="#signup" class="block px-6 py-3 bg-indigo-600 text-white text-center hover:bg-indigo-700 cta-button">회원가입 / 시작하기</a>
-        </div>
-    </nav>
 
-    <header class="hero-bg text-white pt-32 pb-20">
-        <div class="container mx-auto px-6 text-center">
-            <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                눈 앞에 보이는 모든 것, <span class="text-yellow-300">스케치</span>하고 <span class="text-green-300">이름</span>도 알아보세요!
-            </h1>
-            <p class="text-lg md:text-xl mb-10 max-w-3xl mx-auto">
-                "QUESTION" 앱과 함께라면 아이들의 호기심이 즐거운 배움으로 이어집니다.
-                카메라로 비추기만 하세요! AI가 사물을 인식하여 스케치 도안을 만들고, 이름도 척척 알려줘요.
-            </p>
-            <a href="#features" class="bg-white text-indigo-700 font-semibold px-8 py-4 rounded-lg shadow-lg hover:bg-gray-100 text-lg cta-button">
-                자세히 알아보기 <i class="fas fa-arrow-right ml-2" aria-hidden="true"></i>
-            </a>
+            <!-- 모바일 메뉴 -->
+            <div id="mobileMenu" class="hidden lg:hidden mt-4 pt-4 border-t">
+                <div class="space-y-2">
+                    <button onclick="showSection('dashboard')" class="block w-full text-left py-2 text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-home mr-2"></i>대시보드
+                    </button>
+                    <button onclick="showSection('practice')" class="block w-full text-left py-2 text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-graduation-cap mr-2"></i>연습 모드
+                    </button>
+                    <button onclick="showSection('tournaments')" class="block w-full text-left py-2 text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-trophy mr-2"></i>토너먼트
+                    </button>
+                    <button onclick="showSection('events')" class="block w-full text-left py-2 text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-calendar-alt mr-2"></i>이벤트
+                    </button>
+                    <button onclick="showSection('community')" class="block w-full text-left py-2 text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-users mr-2"></i>커뮤니티
+                    </button>
+                    <button onclick="showSection('analytics')" class="block w-full text-left py-2 text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-chart-line mr-2"></i>분석
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
-    <section id="features" class="py-20 bg-white">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-4">QUESTION 앱의 놀라운 기능</h2>
-            <p class="text-center text-gray-600 mb-12 max-w-xl mx-auto">
-                아이들의 눈으로 세상을 탐험하고, 창의력과 지식을 함께 키워요!
-            </p>
-            <div class="grid md:grid-cols-2 gap-10">
-                <div class="bg-gray-50 p-8 rounded-xl shadow-lg feature-card">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-indigo-500 text-white p-3 rounded-full mr-4" aria-hidden="true">
-                            <i class="fas fa-pencil-ruler text-2xl"></i>
+    <!-- 메인 콘텐츠 -->
+    <main class="min-h-screen">
+        <!-- 대시보드 섹션 -->
+        <section id="dashboardSection" class="section animate-fade-in">
+            <!-- 히어로 영역 -->
+            <div class="hero-section text-white py-20">
+                <div class="container mx-auto px-4 relative z-10">
+                    <div class="text-center max-w-4xl mx-auto">
+                        <h2 class="text-5xl font-bold mb-6 animate-fade-in">
+                            타자 마스터의 시작,
+                            <span class="text-yellow-300">OpenTyping Pro</span>
+                        </h2>
+                        <p class="text-xl mb-8 opacity-90 animate-fade-in" style="animation-delay: 0.2s;">
+                            AI 기반 맞춤 학습, 실시간 토너먼트, 전문 분석 리포트
+                        </p>
+                        <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 animate-fade-in" style="animation-delay: 0.4s;">
+                            <button onclick="quickStart('beginner')" class="btn-primary text-lg px-8 py-4">
+                                <i class="fas fa-rocket mr-2"></i>빠른 시작
+                            </button>
+                            <button onclick="showSection('tournaments')" class="bg-white/20 backdrop-blur-md text-white px-8 py-4 rounded-xl font-semibold hover:bg-white/30 transition">
+                                <i class="fas fa-trophy mr-2"></i>토너먼트 참가
+                            </button>
                         </div>
-                        <h3 class="text-2xl font-semibold">AI 스케치 마법사</h3>
                     </div>
-                    <p class="text-gray-600 leading-relaxed">
-                        주변의 어떤 사물이든 카메라로 비추면 AI가 즉시 멋진 스케치 도안으로 변환해줘요!
-                        아이들이 직접 색칠하며 관찰력과 표현력을 기를 수 있습니다. (예: 동물, 장난감, 음식 등)
-                    </p>
                 </div>
-                <div class="bg-gray-50 p-8 rounded-xl shadow-lg feature-card">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-green-500 text-white p-3 rounded-full mr-4" aria-hidden="true">
-                            <i class="fas fa-bullhorn text-2xl"></i>
+            </div>
+
+            <!-- 통계 카드 -->
+            <div class="container mx-auto px-4 -mt-10 relative z-20">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card animate-fade-in" style="animation-delay: 0.1s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-tachometer-alt text-blue-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm text-green-600 font-medium">
+                                <i class="fas fa-arrow-up mr-1"></i>12%
+                            </span>
                         </div>
-                        <h3 class="text-2xl font-semibold">"엄마, 이거 뭐야?" AI 이름표</h3>
+                        <h3 class="text-2xl font-bold text-gray-800">85 WPM</h3>
+                        <p class="text-gray-600">평균 타수</p>
+                        <div class="progress-bar mt-3">
+                            <div class="progress-fill" style="width: 75%;"></div>
+                        </div>
                     </div>
-                    <p class="text-gray-600 leading-relaxed">
-                        "이 동물 이름이 뭐지?" 궁금할 땐 QUESTION 앱에게 물어보세요!
-                        카메라로 동물을 비추면 AI가 인식하고 정확한 이름을 음성으로 알려줍니다. (조류, 파충류, 포유류 등)
-                    </p>
+
+                    <div class="stat-card animate-fade-in" style="animation-delay: 0.2s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-bullseye text-green-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm text-green-600 font-medium">
+                                <i class="fas fa-arrow-up mr-1"></i>5%
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">96.5%</h3>
+                        <p class="text-gray-600">정확도</p>
+                        <div class="progress-bar mt-3">
+                            <div class="progress-fill" style="width: 96.5%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card animate-fade-in" style="animation-delay: 0.3s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-clock text-purple-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm text-purple-600 font-medium">
+                                이번 주
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">12.5시간</h3>
+                        <p class="text-gray-600">총 연습 시간</p>
+                        <div class="progress-bar mt-3">
+                            <div class="progress-fill" style="width: 60%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card animate-fade-in" style="animation-delay: 0.4s;">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-medal text-yellow-600 text-xl"></i>
+                            </div>
+                            <span class="text-sm text-yellow-600 font-medium">
+                                레벨 15
+                            </span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-800">2,450</h3>
+                        <p class="text-gray-600">총 점수</p>
+                        <div class="progress-bar mt-3">
+                            <div class="progress-fill" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 일일 챌린지 및 이벤트 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-fire text-orange-500 mr-2"></i>
+                                일일 챌린지
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border-l-4 border-blue-500">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">속도의 제왕</h4>
+                                        <p class="text-sm text-gray-600">60초 동안 100 WPM 달성</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold text-blue-600">85/100</p>
+                                        <button class="text-sm text-blue-600 hover:text-blue-700">도전하기</button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-l-4 border-green-500">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">정확성 마스터</h4>
+                                        <p class="text-sm text-gray-600">98% 정확도로 5분 연습</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold text-green-600">96/98</p>
+                                        <button class="text-sm text-green-600 hover:text-green-700">도전하기</button>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border-l-4 border-purple-500">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">문장의 귀재</h4>
+                                        <p class="text-sm text-gray-600">10개 긴 문장 완벽 타이핑</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold text-purple-600">7/10</p>
+                                        <button class="text-sm text-purple-600 hover:text-purple-700">도전하기</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                                <i class="fas fa-calendar-check text-purple-500 mr-2"></i>
+                                진행 중 이벤트
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-semibold text-gray-800">주말 특별 토너먼트</h4>
+                                        <span class="badge badge-gold text-xs">HOT</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2">상금: 100,000원</p>
+                                    <div class="flex items-center justify-between text-xs text-gray-500">
+                                        <span><i class="fas fa-users mr-1"></i>256명 참가</span>
+                                        <span><i class="fas fa-clock mr-1"></i>2시간 남음</span>
+                                    </div>
+                                    <button class="w-full mt-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-2 rounded-lg font-semibold hover:from-yellow-600 hover:to-orange-600 transition">
+                                        즉시 참가
+                                    </button>
+                                </div>
+                                <div class="p-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-semibold text-gray-800">신인 월드컵</h4>
+                                        <span class="badge badge-silver text-xs">NEW</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2">초보자만 참가 가능</p>
+                                    <div class="flex items-center justify-between text-xs text-gray-500">
+                                        <span><i class="fas fa-users mr-1"></i>89명 참가</span>
+                                        <span><i class="fas fa-clock mr-1"></i>3일 남음</span>
+                                    </div>
+                                    <button class="w-full mt-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-purple-600 transition">
+                                        참가 신청
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 최근 활동 및 랭킹 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-history text-blue-500 mr-2"></i>
+                            최근 활동
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-trophy text-green-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800">단어 레이스 1위 달성</p>
+                                    <p class="text-sm text-gray-500">2분 전 • 92 WPM</p>
+                                </div>
+                                <span class="text-lg font-bold text-green-600">+150</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-medal text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800">속도의 악마 배지 획득</p>
+                                    <p class="text-sm text-gray-500">15분 전 • 75 WPM</p>
+                                </div>
+                                <span class="text-lg font-bold text-blue-600">+100</span>
+                            </div>
+                            <div class="flex items-center space-x-3 p-3 hover:bg-gray-50 rounded-lg transition">
+                                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-star text-purple-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-800">일일 챌린지 완료</p>
+                                    <p class="text-sm text-gray-500">1시간 전 • 정확도 98%</p>
+                                </div>
+                                <span class="text-lg font-bold text-purple-600">+200</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-crown text-yellow-500 mr-2"></i>
+                            실시간 랭킹
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="leaderboard-item rank-1 rank-animation">
+                                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center font-bold">
+                                    1
+                                </div>
+                                <img src="https://picsum.photos/seed/user1/40/40.jpg" class="w-10 h-10 rounded-full ml-3">
+                                <div class="flex-1 ml-3">
+                                    <p class="font-semibold">KeyboardMaster</p>
+                                    <p class="text-sm opacity-90">142 WPM</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold">15,250</p>
+                                    <p class="text-sm opacity-90">점수</p>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item rank-2 rank-animation" style="animation-delay: 0.1s;">
+                                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center font-bold">
+                                    2
+                                </div>
+                                <img src="https://picsum.photos/seed/user2/40/40.jpg" class="w-10 h-10 rounded-full ml-3">
+                                <div class="flex-1 ml-3">
+                                    <p class="font-semibold">SpeedDemon</p>
+                                    <p class="text-sm opacity-90">138 WPM</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold">14,800</p>
+                                    <p class="text-sm opacity-90">점수</p>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item rank-3 rank-animation" style="animation-delay: 0.2s;">
+                                <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center font-bold">
+                                    3
+                                </div>
+                                <img src="https://picsum.photos/seed/user3/40/40.jpg" class="w-10 h-10 rounded-full ml-3">
+                                <div class="flex-1 ml-3">
+                                    <p class="font-semibold">TypeNinja</p>
+                                    <p class="text-sm opacity-90">125 WPM</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold">13,950</p>
+                                    <p class="text-sm opacity-90">점수</p>
+                                </div>
+                            </div>
+                            <div class="leaderboard-item rank-animation" style="animation-delay: 0.3s;">
+                                <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-700">
+                                    4
+                                </div>
+                                <div class="w-10 h-10 bg-gray-200 rounded-full ml-3 flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-500"></i>
+                                </div>
+                                <div class="flex-1 ml-3">
+                                    <p class="font-semibold text-gray-700">당신</p>
+                                    <p class="text-sm text-gray-600">85 WPM</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-gray-700">2,450</p>
+                                    <p class="text-sm text-gray-600">점수</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="how-it-works" class="py-20 bg-indigo-50">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-12">사용법도 간단해요!</h2>
-            <div class="grid md:grid-cols-3 gap-10 text-center">
-                <div class="p-6">
-                    <div class="bg-white inline-block p-6 rounded-full shadow-md mb-6" aria-hidden="true">
-                        <i class="fas fa-camera text-4xl text-indigo-500"></i>
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">1. 찰칵! 사물 비추기</h3>
-                    <p class="text-gray-600">궁금한 사물이나 그리고 싶은 대상을 앱 카메라로 비춰보세요.</p>
+        <!-- 연습 모드 섹션 -->
+        <section id="practiceSection" class="section hidden">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">전문 연습 모드</h2>
+                    <p class="text-xl text-gray-600">단계별 맞춤 학습으로 타자 실력을 향상시켜보세요</p>
                 </div>
-                <div class="p-6">
-                    <div class="bg-white inline-block p-6 rounded-full shadow-md mb-6" aria-hidden="true">
-                        <i class="fas fa-brain text-4xl text-green-500"></i>
+
+                <!-- 연습 모드 카테고리 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div onclick="showPracticeCategory('basic')" class="practice-category-card bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl p-6 text-white cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl">
+                        <div class="text-center">
+                            <i class="fas fa-keyboard text-4xl mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold mb-2">기초 연습</h3>
+                            <p class="opacity-90 mb-4">손가락 위치와 기본 자세 학습</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>🎯 레슨 수:</span>
+                                    <span>12개</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>⏱️ 예상 시간:</span>
+                                    <span>30분</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>📈 난이도:</span>
+                                    <span>⭐</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">2. 똑똑! AI 인식</h3>
-                    <p class="text-gray-600">AI가 빠르게 사물을 인식하고, 스케치로 변환하거나 이름을 찾아줘요.</p>
+
+                    <div onclick="showPracticeCategory('speed')" class="practice-category-card bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl p-6 text-white cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl">
+                        <div class="text-center">
+                            <i class="fas fa-tachometer-alt text-4xl mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold mb-2">속도 훈련</h3>
+                            <p class="opacity-90 mb-4">빠른 타이핑 속도 향상</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>🎯 레슨 수:</span>
+                                    <span>15개</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>⏱️ 예상 시간:</span>
+                                    <span>45분</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>📈 난이도:</span>
+                                    <span>⭐⭐⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="showPracticeCategory('accuracy')" class="practice-category-card bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl">
+                        <div class="text-center">
+                            <i class="fas fa-bullseye text-4xl mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold mb-2">정확도 향상</h3>
+                            <p class="opacity-90 mb-4">오타 없는 정확한 타이핑</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>🎯 레슨 수:</span>
+                                    <span>10개</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>⏱️ 예상 시간:</span>
+                                    <span>40분</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>📈 난이도:</span>
+                                    <span>⭐⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="showPracticeCategory('numbers')" class="practice-category-card bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl p-6 text-white cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl">
+                        <div class="text-center">
+                            <i class="fas fa-hashtag text-4xl mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold mb-2">숫자 연습</h3>
+                            <p class="opacity-90 mb-4">숫자 키패드 전문 훈련</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>🎯 레슨 수:</span>
+                                    <span>8개</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>⏱️ 예상 시간:</span>
+                                    <span>25분</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>📈 난이도:</span>
+                                    <span>⭐⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="showPracticeCategory('symbols')" class="practice-category-card bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl p-6 text-white cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl">
+                        <div class="text-center">
+                            <i class="fas fa-asterisk text-4xl mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold mb-2">특수문자</h3>
+                            <p class="opacity-90 mb-4">특수문자 입력 능력 향상</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>🎯 레슨 수:</span>
+                                    <span>12개</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>⏱️ 예상 시간:</span>
+                                    <span>35분</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>📈 난이도:</span>
+                                    <span>⭐⭐⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div onclick="showPracticeCategory('programming')" class="practice-category-card bg-gradient-to-br from-gray-600 to-gray-800 rounded-2xl p-6 text-white cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl">
+                        <div class="text-center">
+                            <i class="fas fa-code text-4xl mb-4 animate-pulse"></i>
+                            <h3 class="text-2xl font-bold mb-2">프로그래밍</h3>
+                            <p class="opacity-90 mb-4">코드 입력 속도 향상</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>🎯 레슨 수:</span>
+                                    <span>20개</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>⏱️ 예상 시간:</span>
+                                    <span>60분</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>📈 난이도:</span>
+                                    <span>⭐⭐⭐⭐</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="p-6">
-                    <div class="bg-white inline-block p-6 rounded-full shadow-md mb-6" aria-hidden="true">
-                        <i class="fas fa-palette text-4xl text-pink-500"></i>
+
+                <!-- 연습 영역 -->
+                <div id="practiceArea" class="hidden">
+                    <div class="bg-white rounded-2xl shadow-xl p-8">
+                        <!-- 진행 상황 -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="text-lg font-semibold text-gray-800">진행률</h3>
+                                <span id="practiceProgress" class="text-lg font-bold text-indigo-600">0%</span>
+                            </div>
+                            <div class="progress-bar h-3">
+                                <div id="practiceProgressBar" class="progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- 실시간 통계 -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <i class="fas fa-tachometer-alt text-blue-600"></i>
+                                    <span class="text-xs text-green-600 font-medium">+5%</span>
+                                </div>
+                                <p class="text-sm text-gray-600">현재 타수</p>
+                                <p id="currentWPM" class="text-2xl font-bold text-gray-800">0</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <i class="fas fa-bullseye text-green-600"></i>
+                                    <span class="text-xs text-green-600 font-medium">목표</span>
+                                </div>
+                                <p class="text-sm text-gray-600">정확도</p>
+                                <p id="currentAccuracy" class="text-2xl font-bold text-gray-800">100%</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <i class="fas fa-clock text-purple-600"></i>
+                                    <span class="text-xs text-gray-500 font-medium">남음</span>
+                                </div>
+                                <p class="text-sm text-gray-600">시간</p>
+                                <p id="currentTime" class="text-2xl font-bold text-gray-800">0:00</p>
+                            </div>
+                            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-xl">
+                                <div class="flex items-center justify-between mb-2">
+                                    <i class="fas fa-star text-yellow-600"></i>
+                                    <span class="text-xs text-green-600 font-medium">+50</span>
+                                </div>
+                                <p class="text-sm text-gray-600">점수</p>
+                                <p id="currentScore" class="text-2xl font-bold text-gray-800">0</p>
+                            </div>
+                        </div>
+
+                        <!-- 텍스트 표시 영역 -->
+                        <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                            <div id="practiceText" class="typing-text text-gray-800"></div>
+                        </div>
+
+                        <!-- 입력 영역 -->
+                        <div class="mb-6">
+                            <input
+                                type="text"
+                                id="practiceInput"
+                                class="w-full px-6 py-4 text-lg border-2 border-gray-300 rounded-xl focus:border-indigo-500 focus:outline-none transition-all duration-300"
+                                placeholder="여기에 타이핑하세요..."
+                                autocomplete="off"
+                                disabled
+                            >
+                        </div>
+
+                        <!-- 컨트롤 버튼 -->
+                        <div class="flex justify-center space-x-4">
+                            <button id="startPracticeBtn" onclick="startPracticeSession()" class="btn-primary">
+                                <i class="fas fa-play mr-2"></i>시작하기
+                            </button>
+                            <button id="pausePracticeBtn" onclick="pausePracticeSession()" class="btn-secondary hidden">
+                                <i class="fas fa-pause mr-2"></i>일시정지
+                            </button>
+                            <button onclick="restartPracticeSession()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition">
+                                <i class="fas fa-redo mr-2"></i>다시하기
+                            </button>
+                            <button onclick="showPracticeCategory('basic')" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-xl font-semibold transition">
+                                <i class="fas fa-arrow-left mr-2"></i>뒤로가기
+                            </button>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">3. 짠! 결과 확인 &amp; 활용</h3>
-                    <p class="text-gray-600">멋진 스케치 도안에 색칠하거나, 사물의 이름을 음성으로 들어보세요!</p>
+
+                    <!-- 가상 키보드 -->
+                    <div class="bg-white rounded-2xl shadow-xl p-6 mt-6">
+                        <h3 class="text-lg font-semibold text-center mb-4">가상 키보드</h3>
+                        <div id="virtualKeyboard" class="space-y-2">
+                            <!-- 키보드가 JavaScript로 동적으로 생성됩니다 -->
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- AI Recognition Section -->
-    <section id="ai-recognition" class="py-20 bg-white">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold text-center mb-12">사물 인식 시작하기</h2>
-            <p class="text-center text-gray-600 mb-8 max-w-xl mx-auto">
-                카메라로 사물을 비추거나 이미지를 업로드하여 AI에게 물어보세요!
-            </p>
-
-            <div class="max-w-2xl mx-auto bg-gray-100 p-6 rounded-lg shadow-lg">
-                <!-- Camera/Image Display Area -->
-                <div class="w-full h-96 bg-gray-300 rounded-md mb-6 flex items-center justify-center overflow-hidden">
-                    <video id="cameraFeed" class="hidden w-full h-full object-cover"></video>
-                    <img id="uploadedImage" class="hidden w-full h-full object-contain" alt="업로드된 이미지">
-                    <p id="placeholderText" class="text-gray-600">카메라를 켜거나 이미지를 업로드하세요.</p>
+        <!-- 토너먼트 섹션 -->
+        <section id="tournamentsSection" class="section hidden">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">전문 토너먼트</h2>
+                    <p class="text-xl text-gray-600">실시간 경쟁으로 최고의 타이피스트가 되어보세요</p>
                 </div>
 
-                <!-- Controls -->
-                <div class="flex justify-center space-x-4 mb-6">
-                    <button id="startCameraBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 cta-button flex items-center">
-                        <i class="fas fa-camera mr-2"></i> 카메라 켜기
-                    </button>
-                    <input type="file" id="uploadImageInput" accept="image/*" class="hidden">
-                    <button id="uploadImageBtn" class="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 cta-button flex items-center">
-                        <i class="fas fa-upload mr-2"></i> 이미지 업로드
-                    </button>
+                <!-- 진행 중 토너먼트 -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-fire text-orange-500 mr-2"></i>
+                        진행 중 토너먼트
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="tournament-card bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="badge bg-white/20 text-white">HOT</span>
+                                <div class="text-right">
+                                    <p class="text-sm opacity-90">상금</p>
+                                    <p class="text-2xl font-bold">100,000원</p>
+                                </div>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">주말 스피드 마스터</h4>
+                            <p class="text-sm opacity-90 mb-4">최고 속도를 겨루는 주말 특별 토너먼트</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-users mr-1"></i>참가자</span>
+                                    <span>256/500명</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-clock mr-1"></i>남은 시간</span>
+                                    <span>2시간 15분</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-trophy mr-1"></i>1위 상금</span>
+                                    <span>50,000원</span>
+                                </div>
+                            </div>
+                            <button onclick="joinTournament('weekend')" class="w-full bg-white text-orange-500 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                                즉시 참가하기
+                            </button>
+                        </div>
+
+                        <div class="tournament-card bg-gradient-to-br from-blue-400 to-purple-500 rounded-2xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="badge bg-white/20 text-white">NEW</span>
+                                <div class="text-right">
+                                    <p class="text-sm opacity-90">상금</p>
+                                    <p class="text-2xl font-bold">50,000원</p>
+                                </div>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">신인 월드컵</h4>
+                            <p class="text-sm opacity-90 mb-4">초보자를 위한 특별 토너먼트</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-users mr-1"></i>참가자</span>
+                                    <span>89/200명</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-clock mr-1"></i>남은 시간</span>
+                                    <span>3일 5시간</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-trophy mr-1"></i>1위 상금</span>
+                                    <span>25,000원</span>
+                                </div>
+                            </div>
+                            <button onclick="joinTournament('rookie')" class="w-full bg-white text-blue-500 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                                참가 신청하기
+                            </button>
+                        </div>
+
+                        <div class="tournament-card bg-gradient-to-br from-green-400 to-teal-500 rounded-2xl p-6 text-white shadow-xl transform hover:scale-105 transition-all duration-300">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="badge bg-white/20 text-white">PRO</span>
+                                <div class="text-right">
+                                    <p class="text-sm opacity-90">상금</p>
+                                    <p class="text-2xl font-bold">200,000원</p>
+                                </div>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">정확도 챔피언십</h4>
+                            <p class="text-sm opacity-90 mb-4">정확도로 겨루는 프로 토너먼트</p>
+                            <div class="space-y-2 mb-4">
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-users mr-1"></i>참가자</span>
+                                    <span>45/100명</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-clock mr-1"></i>남은 시간</span>
+                                    <span>1일 8시간</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span><i class="fas fa-trophy mr-1"></i>1위 상금</span>
+                                    <span>100,000원</span>
+                                </div>
+                            </div>
+                            <button onclick="joinTournament('accuracy')" class="w-full bg-white text-green-500 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                                자격 확인 후 참가
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                 <button id="captureBtn" class="hidden bg-purple-600 text-white px-6 py-3 rounded-md hover:bg-purple-700 cta-button w-full mb-4 flex items-center justify-center">
-                    <i class="fas fa-camera-retro mr-2"></i> 촬영하고 인식하기
-                </button>
 
-                <!-- Hidden canvas for capturing frames -->
-                <canvas id="captureCanvas" class="hidden"></canvas>
+                <!-- 예정 토너먼트 -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-calendar-alt text-blue-500 mr-2"></i>
+                        예정 토너먼트
+                    </h3>
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 transition">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-red-400 to-pink-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+                                        25
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">크리스마스 스페셜</h4>
+                                        <p class="text-sm text-gray-600">12월 25일 오후 2시</p>
+                                        <p class="text-xs text-gray-500">상금 총액: 500,000원</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <button class="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition">
+                                        사전 등록
+                                    </button>
+                                    <p class="text-sm text-gray-500 mt-1">124명 등록</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 border rounded-xl hover:bg-gray-50 transition">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+                                        31
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">연말 대토너먼트</h4>
+                                        <p class="text-sm text-gray-600">12월 31일 오후 8시</p>
+                                        <p class="text-xs text-gray-500">상금 총액: 1,000,000원</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <button class="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-600 transition">
+                                        사전 등록
+                                    </button>
+                                    <p class="text-sm text-gray-500 mt-1">89명 등록</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <!-- Recognition Result Area -->
-                <div id="recognitionResult" class="hidden bg-white p-6 rounded-md shadow-inner text-center">
-                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">찾았어요!</h3>
-                    <p id="resultObjectName" class="text-4xl font-bold text-indigo-600 mb-2"></p> <!-- Object Name -->
-                    <p id="resultClassification" class="text-lg text-gray-700 mb-4"></p> <!-- Classification -->
-                    <p id="resultDescription" class="text-md text-gray-600 mb-4"></p> <!-- Description -->
-                    <button id="speakAgainBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"><i class="fas fa-volume-up mr-1"></i> 다시 듣기</button> <!-- Speak again button -->
+                <!-- 과거 토너먼트 결과 -->
+                <div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-history text-gray-500 mr-2"></i>
+                        최근 토너먼트 결과
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl shadow-lg p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="font-semibold text-gray-800">주말 스피드 마스터</h4>
+                                <span class="text-sm text-gray-500">12월 10일</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-lg">🥇</span>
+                                    <img src="https://picsum.photos/seed/winner1/30/30.jpg" class="w-8 h-8 rounded-full">
+                                    <span class="font-medium">SpeedKing</span>
+                                    <span class="text-sm text-gray-600">156 WPM</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-lg">🥈</span>
+                                    <img src="https://picsum.photos/seed/winner2/30/30.jpg" class="w-8 h-8 rounded-full">
+                                    <span class="font-medium">FastFingers</span>
+                                    <span class="text-sm text-gray-600">142 WPM</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-lg">🥉</span>
+                                    <img src="https://picsum.photos/seed/winner3/30/30.jpg" class="w-8 h-8 rounded-full">
+                                    <span class="font-medium">TypeMaster</span>
+                                    <span class="text-sm text-gray-600">138 WPM</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
-    <!-- End AI Recognition Section -->
+        </section>
 
-    <!-- Sketching Feature Section -->
-    <section id="sketching" class="py-20 bg-indigo-50">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl font-bold text-center mb-12">나만의 스케치 그리기</h2>
-            <p class="text-center text-gray-600 mb-8 max-w-xl mx-auto">
-                자유롭게 상상하며 나만의 사물을 스케치하고 AI에게 무엇인지 물어보세요!
-            </p>
-
-            <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-                <!-- Sketching Canvas -->
-                <canvas id="sketchCanvas" class="border border-gray-300 rounded-md w-full" style="aspect-ratio: 4/3;"></canvas>
-
-                <!-- Drawing Tools -->
-                <div class="mt-4 flex flex-wrap justify-center items-center gap-4">
-                    <!-- Color Picker -->
-                    <div class="flex items-center gap-2">
-                        <label for="colorPicker" class="font-semibold text-gray-700">색상:</label>
-                        <input type="color" id="colorPicker" value="#000000" class="w-8 h-8 rounded-md cursor-pointer">
-                         <!-- Basic Color Palette -->
-                         <div id="basicColorPalette" class="flex gap-1">
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #FF0000;" data-color="#FF0000" aria-label="빨간색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #FFA500;" data-color="#FFA500" aria-label="주황색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #FFFF00;" data-color="#FFFF00" aria-label="노란색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #008000;" data-color="#008000" aria-label="초록색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #0000FF;" data-color="#0000FF" aria-label="파란색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #4B0082;" data-color="#4B0082" aria-label="남색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #EE82EE;" data-color="#EE82EE" aria-label="보라색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #FFFFFF;" data-color="#FFFFFF" aria-label="흰색"></button>
-                             <button class="w-6 h-6 rounded-full border border-gray-300" style="background-color: #000000;" data-color="#000000" aria-label="검정색"></button>
-                         </div>
-                    </div>
-                    
-                    <!-- Brush Size -->
-                    <div class="flex items-center gap-2">
-                        <label for="brushSize" class="font-semibold text-gray-700">굵기:</label>
-                        <input type="range" id="brushSize" min="1" max="20" value="5" class="cursor-pointer">
-                    </div>
-
-                    <!-- Eraser Button -->
-                    <button id="eraserBtn" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 flex items-center">
-                        <i class="fas fa-eraser mr-1"></i> 지우개
-                    </button>
-
-                    <!-- Clear Button -->
-                    <button id="clearCanvasBtn" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex items-center">
-                        <i class="fas fa-trash-alt mr-1"></i> 모두 지우기
-                    </button>
+        <!-- 이벤트 섹션 -->
+        <section id="eventsSection" class="section hidden">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">특별 이벤트</h2>
+                    <p class="text-xl text-gray-600">참여하여 보상을 획득하고 실력을 향상시켜보세요</p>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="mt-6 flex flex-wrap justify-center items-center gap-4">
-                    <button id="recognizeSketchBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 cta-button flex items-center">
-                        <i class="fas fa-brain mr-2"></i> 스케치 인식하기
-                    </button>
-                     <button id="saveSketchBtn" class="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 flex items-center">
-                        <i class="fas fa-save mr-2"></i> 스케치 저장
-                    </button>
-                     <button id="shareSketchBtn" class="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 flex items-center">
-                        <i class="fas fa-share-alt mr-2"></i> 스케치 공유
-                    </button>
-                </div>
-                 
-                 <!-- Sketch Recognition Result Area (can reuse or create new) -->
-                 <!-- For simplicity, we might reuse recognitionResult, but potentially with different display logic -->
-                 <div id="sketchRecognitionResult" class="hidden bg-white p-6 rounded-md shadow-inner text-center mt-6">
-                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">스케치 인식 결과:</h3>
-                    <p id="sketchResultObjectName" class="text-4xl font-bold text-indigo-600 mb-2"></p> <!-- Object Name -->
-                    <p id="sketchResultClassification" class="text-lg text-gray-700 mb-4"></p> <!-- Classification -->
-                    <p id="sketchResultDescription" class="text-md text-gray-600 mb-4"></p> <!-- Description -->
-                    <button id="sketchSpeakAgainBtn" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"><i class="fas fa-volume-up mr-1"></i> 다시 듣기</button> <!-- Speak again button -->
-                 </div>
+                <!-- 현재 이벤트 -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">진행 중 이벤트</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-6 text-white shadow-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-yellow-400 text-purple-800 px-3 py-1 rounded-full text-sm font-bold">EVENT</span>
+                                <div class="text-right">
+                                    <p class="text-sm opacity-90">남은 시간</p>
+                                    <p class="font-bold">5일 12시간</p>
+                                </div>
+                            </div>
+                            <h4 class="text-2xl font-bold mb-2">연말 챌린지</h4>
+                            <p class="opacity-90 mb-4">10일간 매일 미션 완료하고 특별 보상 받기!</p>
+                            <div class="bg-white/20 rounded-xl p-4 mb-4">
+                                <p class="font-semibold mb-2">보상:</p>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div>🎁 골드 배지</div>
+                                    <div>💎 500 포인트</div>
+                                    <div>🏆 한정 티켓</div>
+                                    <div>👑 VIP 1일권</div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span>진행률</span>
+                                    <span>7/10 완료</span>
+                                </div>
+                                <div class="progress-bar h-2">
+                                    <div class="progress-fill" style="width: 70%;"></div>
+                                </div>
+                            </div>
+                        </div>
 
+                        <div class="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 text-white shadow-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-green-400 text-blue-800 px-3 py-1 rounded-full text-sm font-bold">NEW</span>
+                                <div class="text-right">
+                                    <p class="text-sm opacity-90">남은 시간</p>
+                                    <p class="font-bold">3일 8시간</p>
+                                </div>
+                            </div>
+                            <h4 class="text-2xl font-bold mb-2">친구 초대 이벤트</h4>
+                            <p class="opacity-90 mb-4">친구를 초대하고 함께 보상을 받아보세요!</p>
+                            <div class="bg-white/20 rounded-xl p-4 mb-4">
+                                <p class="font-semibold mb-2">초대 보상:</p>
+                                <ul class="text-sm space-y-1">
+                                    <li>• 1명 초대: 100 포인트</li>
+                                    <li>• 3명 초대: 500 포인트</li>
+                                    <li>• 5명 초대: 1,000 포인트 + 배지</li>
+                                </ul>
+                            </div>
+                            <button class="w-full bg-white text-blue-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                                <i class="fas fa-share-alt mr-2"></i>친구 초대하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 일일 퀘스트 -->
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">일일 퀘스트</h3>
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="border rounded-xl p-4 hover:bg-gray-50 transition">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-800">속도 도전</h4>
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-semibold">완료</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">80 WPM 이상 달성</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-blue-600">보상: 50 포인트</span>
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                </div>
+                            </div>
+                            <div class="border rounded-xl p-4 hover:bg-gray-50 transition">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-800">정확도 마스터</h4>
+                                    <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">진행중</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">95% 정확도로 5분 연습</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-blue-600">보상: 75 포인트</span>
+                                    <span class="text-sm text-gray-500">3/5 분</span>
+                                </div>
+                            </div>
+                            <div class="border rounded-xl p-4 hover:bg-gray-50 transition opacity-75">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-800">연습의 달인</h4>
+                                    <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-semibold">잠김</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">30분 연속 연습</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-blue-600">보상: 100 포인트</span>
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
-    <!-- End Sketching Feature Section -->
+        </section>
 
-    <section id="preview" class="py-20 bg-white">
-        <div class="container mx-auto px-6">
-            <h2 class="text-3xl font-bold text-center mb-12">앱 화면 미리보기</h2>
-            <div class="bg-gray-200 p-4 md:p-8 rounded-lg shadow-xl max-w-5xl mx-auto">
-                <div class="screenshot-container">
-                    <img src="img/mockup_screen1.jpg" alt="QUESTION 앱 스케치 변환 준비 화면 예시" class="screenshot-item" loading="lazy">
-                    <img src="img/mockup_screen2.jpg" alt="QUESTION 앱 스케치 완성 및 색칠 화면 예시" class="screenshot-item" loading="lazy">
-                    <img src="img/mockup_screen3.jpg" alt="QUESTION 앱 동물 이름 알려주기 화면 예시" class="screenshot-item" loading="lazy">
-                </div>
-                <p class="text-center mt-6 text-gray-600">아이들이 사용하기 쉽고 재미있는 인터페이스를 제공합니다.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="signup" class="py-20 bg-gradient-to-br from-purple-600 to-indigo-600 text-white">
-        <div class="container mx-auto px-6 text-center">
-            <h2 class="text-3xl md:text-4xl font-bold mb-6">QUESTION 앱, 지금 바로 시작하세요!</h2>
-            <p class="text-lg md:text-xl mb-10 max-w-xl mx-auto">
-                간편하게 가입하고 아이들의 무한한 상상력과 호기심을 키워주세요.
-            </p>
-            
-            <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl text-gray-800">
-                <h3 class="text-2xl font-semibold mb-6 text-center">회원가입</h3>
-                <form action="#" method="POST" id="signupForm">
-                    <div class="mb-4">
-                        <label for="email-signup" class="block text-sm font-medium text-gray-700 text-left mb-1">이메일 주소</label>
-                        <input type="email" id="email-signup" name="email" placeholder="your_email@example.com" required
-                               class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
-                    </div>
-                    <div class="mb-6">
-                        <label for="password-signup" class="block text-sm font-medium text-gray-700 text-left mb-1">비밀번호</label>
-                        <input type="password" id="password-signup" name="password" placeholder="********" required minlength="8"
-                               class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
-                    </div>
-                    <button type="submit"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-3 rounded-md cta-button">
-                        이메일로 가입하기
-                    </button>
-                </form>
-
-                <div class="my-6 flex items-center">
-                    <hr class="flex-grow border-gray-300">
-                    <span class="mx-4 text-gray-500 text-sm">또는</span>
-                    <hr class="flex-grow border-gray-300">
+        <!-- 커뮤니티 섹션 -->
+        <section id="communitySection" class="section hidden">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">커뮤니티</h2>
+                    <p class="text-xl text-gray-600">다른 사용자들과 교류하고 실력을 향상시켜보세요</p>
                 </div>
 
-                <div class="space-y-3">
-                    <button type="button" id="googleLoginBtn"
-                            class="w-full flex items-center justify-center bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium p-3 rounded-md social-login-button">
-                        <i class="fab fa-google text-red-500 mr-2"></i> 구글 계정으로 시작하기
-                    </button>
-                    <button type="button" id="kakaoLoginBtn"
-                            class="w-full flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-black font-medium p-3 rounded-md social-login-button">
-                        <i class="fas fa-comment text-black mr-2"></i> 카카오 계정으로 시작하기
-                    </button>
-                    <button type="button" id="naverLoginBtn"
-                            class="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-medium p-3 rounded-md social-login-button">
-                        <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16.213 15.426h-5.43v5.43h5.43v-5.43zm-6.274 0H4.509v5.43h5.43v-5.43zM16.213 8.574H4.509v5.43h11.704V8.574zM16.213 3.143h-5.43v5.43h5.43V3.143zM22.5 8.574h-4.865v5.43H22.5V8.574zM9.939 3.143H4.509v5.43h5.43V3.143z"/></svg>
-                        네이버 계정으로 시작하기
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 게시판 -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="text-xl font-bold text-gray-800">자유 게시판</h3>
+                                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                                    <i class="fas fa-pen mr-2"></i>글쓰기
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="border rounded-xl p-4 hover:bg-gray-50 transition cursor-pointer">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h4 class="font-semibold text-gray-800">타자 속도 150 WPM 돌파 기념!</h4>
+                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">인기</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-3">3개월 동안 꾸준히 연습한 결과 드디어 150 WPM을 돌파했습니다...</p>
+                                    <div class="flex items-center justify-between text-sm text-gray-500">
+                                        <div class="flex items-center space-x-4">
+                                            <span><i class="fas fa-user mr-1"></i>SpeedKing</span>
+                                            <span><i class="fas fa-heart mr-1"></i>234</span>
+                                            <span><i class="fas fa-comment mr-1"></i>45</span>
+                                        </div>
+                                        <span>2시간 전</span>
+                                    </div>
+                                </div>
+                                <div class="border rounded-xl p-4 hover:bg-gray-50 transition cursor-pointer">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <h4 class="font-semibold text-gray-800">정확도 향상 팁 공유합니다</h4>
+                                        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">정보</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-3">제가 정확도 98%를 유지하는 비법을 공유해드릴게요...</p>
+                                    <div class="flex items-center justify-between text-sm text-gray-500">
+                                        <div class="flex items-center space-x-4">
+                                            <span><i class="fas fa-user mr-1"></i>AccuracyPro</span>
+                                            <span><i class="fas fa-heart mr-1"></i>156</span>
+                                            <span><i class="fas fa-comment mr-1"></i>23</span>
+                                        </div>
+                                        <span>5시간 전</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 랭킹 및 통계 -->
+                    <div>
+                        <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">주간 랭킹</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-lg font-bold text-yellow-500">1</span>
+                                    <img src="https://picsum.photos/seed/weekly1/32/32.jpg" class="w-8 h-8 rounded-full">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-sm">KeyboardMaster</p>
+                                        <p class="text-xs text-gray-500">142 WPM</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-lg font-bold text-gray-400">2</span>
+                                    <img src="https://picsum.photos/seed/weekly2/32/32.jpg" class="w-8 h-8 rounded-full">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-sm">SpeedDemon</p>
+                                        <p class="text-xs text-gray-500">138 WPM</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <span class="text-lg font-bold text-orange-600">3</span>
+                                    <img src="https://picsum.photos/seed/weekly3/32/32.jpg" class="w-8 h-8 rounded-full">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-sm">TypeNinja</p>
+                                        <p class="text-xs text-gray-500">125 WPM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">실시간 활동</h3>
+                            <div class="space-y-3">
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span class="text-gray-600"><strong>User123</strong>님이 연습을 시작했습니다</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                                    <span class="text-gray-600"><strong>FastTyper</strong>님이 95 WPM을 기록했습니다</span>
+                                </div>
+                                <div class="flex items-center space-x-2 text-sm">
+                                    <div class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span class="text-gray-600"><strong>Newbie</strong>님이 가입했습니다</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 분석 섹션 -->
+        <section id="analyticsSection" class="section hidden">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-4">전문 분석 리포트</h2>
+                    <p class="text-xl text-gray-600">AI 기반 분석으로 타자 실력을 정밀하게 분석하세요</p>
+                </div>
+
+                <!-- 분석 대시보드 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">실력 향상 그래프</h3>
+                            <canvas id="progressChart" height="100"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="bg-white rounded-2xl shadow-lg p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">손가락별 분석</h3>
+                            <canvas id="fingerChart" height="150"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 상세 통계 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white">
+                        <i class="fas fa-keyboard text-3xl mb-4 opacity-80"></i>
+                        <h4 class="text-lg font-semibold mb-2">총 타수</h4>
+                        <p class="text-3xl font-bold">45,230</p>
+                        <p class="text-sm opacity-90 mt-2">이번 달</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white">
+                        <i class="fas fa-clock text-3xl mb-4 opacity-80"></i>
+                        <h4 class="text-lg font-semibold mb-2">총 연습 시간</h4>
+                        <p class="text-3xl font-bold">24.5시간</p>
+                        <p class="text-sm opacity-90 mt-2">이번 달</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white">
+                        <i class="fas fa-trophy text-3xl mb-4 opacity-80"></i>
+                        <h4 class="text-lg font-semibold mb-2">획득 배지</h4>
+                        <p class="text-3xl font-bold">15개</p>
+                        <p class="text-sm opacity-90 mt-2">총 30개 중</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white">
+                        <i class="fas fa-fire text-3xl mb-4 opacity-80"></i>
+                        <h4 class="text-lg font-semibold mb-2">연속 연습</h4>
+                        <p class="text-3xl font-bold">7일</p>
+                        <p class="text-sm opacity-90 mt-2">최장 기록</p>
+                    </div>
+                </div>
+
+                <!-- AI 추천 -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-8 text-white">
+                    <h3 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-robot mr-2"></i>AI 맞춤 학습 추천
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">강점 분야</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                    왼손 새끼손가락: 탁월함
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                    소문자 입력: 매우 능숙함
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                                    단어 연습: 우수함
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">개선 제안</h4>
+                            <ul class="space-y-2">
+                                <li class="flex items-center">
+                                    <i class="fas fa-arrow-up text-yellow-400 mr-2"></i>
+                                    오른손 약지 연습 권장
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-arrow-up text-yellow-400 mr-2"></i>
+                                    특수문자 입력 속도 향상
+                                </li>
+                                <li class="flex items-center">
+                                    <i class="fas fa-arrow-up text-yellow-400 mr-2"></i>
+                                    긴 문장 연습 집중 권장
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button class="mt-6 bg-white text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition">
+                        <i class="fas fa-play mr-2"></i>AI 맞춤 연습 시작하기
                     </button>
                 </div>
-                <p class="mt-6 text-xs text-gray-500 text-center">
-                    이미 계정이 있으신가요? <a href="#login" class="text-indigo-600 hover:underline" id="showLogin">로그인</a>
-                </p>
             </div>
+        </section>
+    </main>
 
-            <p class="mt-12 text-sm text-gray-200">
-                안드로이드 테스트 버전(APK)은 <a href="#" id="apkDownloadLink" class="underline hover:text-yellow-300">여기서 다운로드</a> 가능합니다. <span id="apkStatusText">(준비중)</span>
-            </p>
-        </div>
-    </section>
-    
-    <section id="login" class="hidden py-20 bg-gray-100">
-        <div class="container mx-auto px-6 text-center">
-             <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl text-gray-800">
-                <h3 class="text-2xl font-semibold mb-6 text-center">로그인</h3>
-                <form action="#" method="POST" id="loginForm">
-                    <div class="mb-4">
-                        <label for="email-login" class="block text-sm font-medium text-gray-700 text-left mb-1">이메일 주소</label>
-                        <input type="email" id="email-login" name="email" placeholder="your_email@example.com" required
-                               class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
+    <!-- 푸터 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-4 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                        OpenTyping Pro
+                    </h3>
+                    <p class="text-gray-400">전문 타자 연습 플랫폼으로 최고의 타이피스트가 되어보세요.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">빠른 링크</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">연습 모드</a></li>
+                        <li><a href="#" class="hover:text-white transition">토너먼트</a></li>
+                        <li><a href="#" class="hover:text-white transition">랭킹</a></li>
+                        <li><a href="#" class="hover:text-white transition">커뮤니티</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">지원</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition">도움말</a></li>
+                        <li><a href="#" class="hover:text-white transition">자주 묻는 질문</a></li>
+                        <li><a href="#" class="hover:text-white transition">연락처</a></li>
+                        <li><a href="#" class="hover:text-white transition">피드백</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">팔로우</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-facebook text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-twitter text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-instagram text-xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition">
+                            <i class="fab fa-youtube text-xl"></i>
+                        </a>
                     </div>
-                    <div class="mb-6">
-                        <label for="password-login" class="block text-sm font-medium text-gray-700 text-left mb-1">비밀번호</label>
-                        <input type="password" id="password-login" name="password" placeholder="********" required
-                               class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none">
-                    </div>
-                    <button type="submit"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold p-3 rounded-md cta-button">
-                        로그인
-                    </button>
-                </form>
-                 <p class="mt-6 text-xs text-gray-500 text-center">
-                    계정이 없으신가요? <a href="#signup" class="text-indigo-600 hover:underline" id="showSignup">회원가입</a>
-                </p>
+                </div>
             </div>
-        </div>
-    </section>
-
-
-    <footer class="bg-gray-800 text-gray-300 py-12">
-        <div class="container mx-auto px-6 text-center">
-            <p class="mb-2">&copy; <span id="currentYear"></span> QUESTION. All Rights Reserved.</p>
-            <p class="text-sm">본 페이지는 데모 목적으로 제작되었습니다.</p>
-            <div class="mt-4">
-                <a href="#" class="text-gray-400 hover:text-white mx-2" aria-label="페이스북 페이지로 이동"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="text-gray-400 hover:text-white mx-2" aria-label="인스타그램 페이지로 이동"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="text-gray-400 hover:text-white mx-2" aria-label="트위터 페이지로 이동"><i class="fab fa-twitter"></i></a>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2024 OpenTyping Pro. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script>
-        // 유틸리티 함수들
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        function setButtonLoading(button, isLoading) {
-            if (isLoading) {
-                button.classList.add('button-loading');
-                button.disabled = true;
-            } else {
-                button.classList.remove('button-loading');
-                button.disabled = false;
-            }
-        }
-
-        function showLoadingSpinner(container) {
-            const spinner = document.createElement('div');
-            spinner.className = 'loading-spinner';
-            container.appendChild(spinner);
-            return spinner;
-        }
-
-        function hideLoadingSpinner(spinner) {
-            if (spinner && spinner.parentNode) {
-                spinner.parentNode.removeChild(spinner);
-            }
-        }
-
-        // 메모리 관리 유틸리티 개선
-        const memoryManager = {
-            // 캔버스 메모리 해제
-            clearCanvas(canvas) {
-                if (canvas) {
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        // 캔버스 크기를 최소화하여 메모리 사용량 감소
-                        canvas.width = 1;
-                        canvas.height = 1;
-                    }
-                }
-            },
-
-            // 이미지 메모리 해제
-            clearImageMemory(imageElement) {
-                if (imageElement) {
-                    // 이미지 소스 제거
-                    imageElement.src = '';
-                    imageElement.removeAttribute('src');
-                    // 이미지 데이터 해제
-                    if (imageElement.complete) {
-                        imageElement.onload = null;
-                        imageElement.onerror = null;
-                    }
-                }
-            },
-
-            // 스트림 정리
-            clearStream(stream) {
-                if (stream) {
-                    stream.getTracks().forEach(track => {
-                        track.stop();
-                        track.enabled = false;
-                    });
-                }
-            },
-
-            // 이미지 캐시 정리
-            async clearImageCache() {
-                if (window.caches) {
-                    try {
-                        const cacheNames = await caches.keys();
-                        await Promise.all(
-                            cacheNames.map(cacheName => caches.delete(cacheName))
-                        );
-                    } catch (error) {
-                        console.error('Error clearing image cache:', error);
-                    }
-                }
-            },
-
-            // 주기적인 메모리 정리
-            startPeriodicCleanup(interval = 5 * 60 * 1000) { // 5분마다
-                setInterval(() => {
-                    this.clearImageCache();
-                    // 가비지 컬렉션 유도
-                    if (window.gc) {
-                        window.gc();
-                    }
-                }, interval);
-            }
-        };
-
-        // 이미지 최적화 유틸리티 개선
-        const imageOptimizer = {
-            // 이미지 크기 최적화
-            async optimizeImage(file, maxSize = 1024) {
-                return new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-
-                            // 이미지 크기가 maxSize보다 크면 비율 유지하며 축소
-                            if (width > maxSize || height > maxSize) {
-                                if (width > height) {
-                                    height = Math.round((height * maxSize) / width);
-                                    width = maxSize;
-                                } else {
-                                    width = Math.round((width * maxSize) / height);
-                                    height = maxSize;
-                                }
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-
-                            // 품질 조정 (0.8 = 80% 품질)
-                            const optimizedData = canvas.toDataURL('image/jpeg', 0.8);
-                            
-                            // 메모리 정리
-                            memoryManager.clearCanvas(canvas);
-                            memoryManager.clearImageMemory(img);
-                            
-                            resolve(optimizedData);
-                        };
-                        img.src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
-        };
-
-        // 모바일 메뉴 토글
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileMenuIcon = document.getElementById('mobile-menu-icon');
-
-        if (mobileMenuButton && mobileMenu && mobileMenuIcon) {
-            mobileMenuButton.addEventListener('click', () => {
-                const isHidden = mobileMenu.classList.toggle('hidden');
-                const isExpanded = !isHidden;
-                mobileMenuButton.setAttribute('aria-expanded', isExpanded.toString());
-
-                if (isExpanded) {
-                    mobileMenuIcon.classList.remove('fa-bars');
-                    mobileMenuIcon.classList.add('fa-times');
-                    mobileMenuIcon.setAttribute('aria-label', '메뉴 닫기');
-                } else {
-                    mobileMenuIcon.classList.remove('fa-times');
-                    mobileMenuIcon.classList.add('fa-bars');
-                    mobileMenuIcon.setAttribute('aria-label', '메뉴 열기');
-                }
-            });
-        }
-
-        // 네비게이션 링크 클릭 시 부드럽게 스크롤 및 모바일 메뉴 닫기
-        document.querySelectorAll('nav a[href^="#"], header a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const href = this.getAttribute('href');
-                if (href.startsWith('#')) {
-                    e.preventDefault();
-                    const targetId = href;
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        targetElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
-                        mobileMenu.classList.add('hidden');
-                        mobileMenuButton.setAttribute('aria-expanded', 'false');
-                        mobileMenuIcon.classList.remove('fa-times');
-                        mobileMenuIcon.classList.add('fa-bars');
-                        mobileMenuIcon.setAttribute('aria-label', '메뉴 열기');
-                    }
-                }
-            });
-        });
-        
-        // 현재 연도 자동 업데이트 (푸터)
-        const currentYearElement = document.getElementById('currentYear');
-        if(currentYearElement) {
-            currentYearElement.textContent = new Date().getFullYear();
-        }
-
-        // 회원가입/로그인 폼 전환
-        const signupSection = document.getElementById('signup');
-        const loginSection = document.getElementById('login');
-        const showLoginLink = document.getElementById('showLogin');
-        const showSignupLink = document.getElementById('showSignup');
-
-        if (showLoginLink && loginSection && signupSection) {
-            showLoginLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginSection.classList.remove('hidden');
-                loginSection.scrollIntoView({ behavior: 'smooth' });
-            });
-        }
-        if (showSignupLink && loginSection && signupSection) {
-             showSignupLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                loginSection.classList.add('hidden');
-                signupSection.scrollIntoView({ behavior: 'smooth' });
-            });
-        }
-
-        // 소셜 로그인 버튼 클릭 시 (실제 기능 연동 필요)
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
-        const kakaoLoginBtn = document.getElementById('kakaoLoginBtn');
-        const naverLoginBtn = document.getElementById('naverLoginBtn');
-
-        if(googleLoginBtn) googleLoginBtn.addEventListener('click', () => { alert('구글 로그인 기능은 준비 중입니다.'); });
-        if(kakaoLoginBtn) kakaoLoginBtn.addEventListener('click', () => { alert('카카오 로그인 기능은 준비 중입니다.'); });
-        if(naverLoginBtn) naverLoginBtn.addEventListener('click', () => { alert('네이버 로그인 기능은 준비 중입니다.'); });
-
-        // 이메일 가입 폼 제출 (실제 기능 연동 필요)
-        const signupForm = document.getElementById('signupForm');
-        if (signupForm) {
-            signupForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const email = this.elements.email.value;
-                alert(`'${email}' (으)로 가입 신청 기능은 준비 중입니다. 실제 서버 연동이 필요합니다.`);
-            });
-        }
-        // 로그인 폼 제출 (실제 기능 연동 필요)
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const email = this.elements.email.value;
-                alert(`'${email}' (으)로 로그인 기능은 준비 중입니다. 실제 서버 연동이 필요합니다.`);
-            });
-        }
-
-        // APK 다운로드 링크 처리
-        const apkDownloadLink = document.getElementById('apkDownloadLink');
-        const apkStatusText = document.getElementById('apkStatusText');
-        const isApkReady = false; // APK 준비 상태 (실제 준비되면 true로 변경)
-        const apkUrl = "download/question-latest.apk"; // 실제 APK 파일 경로
-
-        if (apkDownloadLink && apkStatusText) {
-            if (!isApkReady) {
-                apkDownloadLink.removeAttribute('href');
-                apkDownloadLink.classList.add('opacity-70', 'cursor-not-allowed');
-                apkDownloadLink.classList.remove('hover:text-yellow-300');
-                apkStatusText.textContent = '(현재 준비 중입니다. 잠시만 기다려주세요.)';
-                apkDownloadLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    alert('안드로이드 테스트 버전(APK)은 현재 준비 중입니다.');
-                });
-            } else {
-                apkDownloadLink.href = apkUrl; // 준비되었을 때 실제 링크 설정
-                apkStatusText.textContent = '(지금 바로 다운로드하세요!)';
-            }
-        }
-
-        // --- PWA 관련 스크립트 ---
-
-        // 1. 서비스 워커 등록
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js') // service-worker.js 파일 경로
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(err => {
-                        console.error('ServiceWorker registration failed: ', err);
-                    });
-            });
-        }
-
-        // 2. "홈 화면에 추가" (A2HS - Add to Home Screen) 프롬프트 처리
-        let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-        const installButton = document.getElementById('install-button');
-
-        if (installBanner && installButton) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                // 기본 설치 프롬프트를 막습니다.
-                e.preventDefault();
-                // 나중에 트리거할 수 있도록 이벤트를 저장합니다.
-                deferredPrompt = e;
-                // 설치 배너를 보여줍니다. (이미 설치된 경우 등 조건 추가 가능)
-                if (!window.matchMedia('(display-mode: standalone)').matches) { // PWA로 실행 중이 아닐 때만
-                    installBanner.classList.remove('hidden');
-                }
-            });
-
-            installButton.addEventListener('click', async () => {
-                installBanner.classList.add('hidden'); // 배너 숨기기
-                if (deferredPrompt) {
-                    deferredPrompt.prompt(); // 저장된 프롬프트를 보여줍니다.
-                    // 사용자의 선택을 기다립니다.
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`User response to the install prompt: ${outcome}`);
-                    if (outcome === 'accepted') {
-                        console.log('User accepted the A2HS prompt');
-                    } else {
-                        console.log('User dismissed the A2HS prompt');
-                    }
-                    deferredPrompt = null; // 프롬프트는 한 번만 사용할 수 있습니다.
-                }
-            });
-
-            window.addEventListener('appinstalled', () => {
-                installBanner.classList.add('hidden'); // 앱 설치 완료 시 배너 숨김
-                console.log('QUESTION PWA was installed.');
-            });
-        }
-
-        // 3. 오프라인 상태 감지 및 알림
-        const offlineIndicator = document.getElementById('offline-indicator');
-        function updateOnlineStatus() {
-            if (navigator.onLine) {
-                offlineIndicator.classList.add('hidden');
-                offlineIndicator.classList.remove('opacity-100');
-            } else {
-                offlineIndicator.classList.remove('hidden');
-                setTimeout(() => offlineIndicator.classList.add('opacity-100'), 100); // 부드러운 표시
-            }
-        }
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        updateOnlineStatus(); // 페이지 로드 시 초기 상태 확인
-
-        // --- AI Recognition Feature Script ---
-        const startCameraBtn = document.getElementById('startCameraBtn');
-        const uploadImageBtn = document.getElementById('uploadImageBtn');
-        const uploadImageInput = document.getElementById('uploadImageInput');
-        const captureBtn = document.getElementById('captureBtn');
-        const cameraFeed = document.getElementById('cameraFeed');
-        const uploadedImage = document.getElementById('uploadedImage');
-        const placeholderText = document.getElementById('placeholderText');
-        const recognitionResult = document.getElementById('recognitionResult');
-        const resultObjectName = document.getElementById('resultObjectName');
-        const resultClassification = document.getElementById('resultClassification');
-        const resultDescription = document.getElementById('resultDescription');
-        const speakAgainBtn = document.getElementById('speakAgainBtn');
-
-        const captureCanvas = document.getElementById('captureCanvas');
-        const canvasContext = captureCanvas.getContext('2d');
-
-        let currentStream; // To keep track of the camera stream
-        let model; // To store the loaded MobileNet model
-
-        // Load MobileNet model
-        async function loadModel() {
-            try {
-                model = await mobilenet.load();
-                console.log('MobileNet model loaded successfully');
-            } catch (error) {
-                console.error('Error loading MobileNet model:', error);
-                alert('AI 모델 로딩에 실패했습니다. 페이지를 새로고침해주세요.');
-            }
-        }
-
-        // Load model when page loads
-        loadModel();
-
-        // 카메라 시작 버튼 클릭 이벤트
-        startCameraBtn.addEventListener('click', async () => {
-            try {
-                setButtonLoading(startCameraBtn, true);
-                
-                // 이전 스트림이 있다면 정리
-                if (currentStream) {
-                    stopCamera();
-                }
-
-                // 카메라 접근 권한 요청
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: 'environment', // 후면 카메라 우선
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
-                });
-
-                currentStream = stream;
-                cameraFeed.srcObject = stream;
-                cameraFeed.classList.remove('hidden');
-                placeholderText.classList.add('hidden');
-                captureBtn.classList.remove('hidden');
-                startCameraBtn.classList.add('hidden');
-
-                // 카메라 피드가 로드되면 자동 재생
-                cameraFeed.onloadedmetadata = () => {
-                    cameraFeed.play().catch(error => {
-                        console.error('Error playing camera feed:', error);
-                        showToast('카메라 피드 재생 중 오류가 발생했습니다.', 'error');
-                    });
-                };
-
-            } catch (error) {
-                console.error('Error accessing camera:', error);
-                let errorMessage = '카메라 접근 중 오류가 발생했습니다.';
-                
-                if (error.name === 'NotAllowedError') {
-                    errorMessage = '카메라 접근 권한이 거부되었습니다. 브라우저 설정에서 카메라 접근을 허용해주세요.';
-                } else if (error.name === 'NotFoundError') {
-                    errorMessage = '카메라를 찾을 수 없습니다. 카메라가 연결되어 있는지 확인해주세요.';
-                } else if (error.name === 'NotReadableError') {
-                    errorMessage = '카메라가 다른 애플리케이션에서 사용 중입니다.';
-                }
-                
-                showToast(errorMessage, 'error');
-                stopCamera();
-            } finally {
-                setButtonLoading(startCameraBtn, false);
-            }
-        });
-
-        // 카메라 정지 함수 개선
-        function stopCamera() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => {
-                    track.stop();
-                });
-                currentStream = null;
-            }
-            
-            if (cameraFeed) {
-                cameraFeed.srcObject = null;
-                cameraFeed.classList.add('hidden');
-            }
-            
-            if (placeholderText) {
-                placeholderText.classList.remove('hidden');
-            }
-            
-            if (captureBtn) {
-                captureBtn.classList.add('hidden');
-            }
-            
-            if (startCameraBtn) {
-                startCameraBtn.classList.remove('hidden');
-            }
-        }
-
-        // 페이지 언로드 시 카메라 정리
-        window.addEventListener('beforeunload', () => {
-            stopCamera();
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
-            }
-        });
-
-        // 페이지 로드 시 메모리 관리 시작
-        window.addEventListener('load', () => {
-            memoryManager.startPeriodicCleanup();
-        });
-
-        // 페이지 언로드 시 메모리 정리
-        window.addEventListener('beforeunload', () => {
-            stopCamera();
-            memoryManager.clearCanvas(captureCanvas);
-            memoryManager.clearCanvas(sketchCanvas);
-            memoryManager.clearImageMemory(uploadedImage);
-            memoryManager.clearImageCache();
-        });
-
-        // 모바일 최적화 및 터치 이벤트 처리
-        const mobileOptimizer = {
-            // 터치 이벤트 처리
-            initializeTouchEvents(canvas) {
-                if (!canvas) return;
-
-                let isDrawing = false;
-                let lastX = 0;
-                let lastY = 0;
-
-                const ctx = canvas.getContext('2d');
-
-                // 터치 시작
-                canvas.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    isDrawing = true;
-                    const touch = e.touches[0];
-                    const rect = canvas.getBoundingClientRect();
-                    lastX = touch.clientX - rect.left;
-                    lastY = touch.clientY - rect.top;
-                }, { passive: false });
-
-                // 터치 이동
-                canvas.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    if (!isDrawing) return;
-
-                    const touch = e.touches[0];
-                    const rect = canvas.getBoundingClientRect();
-                    const currentX = touch.clientX - rect.left;
-                    const currentY = touch.clientY - rect.top;
-
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                    ctx.lineTo(currentX, currentY);
-                    ctx.stroke();
-
-                    lastX = currentX;
-                    lastY = currentY;
-                }, { passive: false });
-
-                // 터치 종료
-                canvas.addEventListener('touchend', () => {
-                    isDrawing = false;
-                });
-
-                // 터치 취소
-                canvas.addEventListener('touchcancel', () => {
-                    isDrawing = false;
-                });
-            },
-
-            // 모바일 기기 감지
-            isMobileDevice() {
-                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            },
-
-            // 모바일 최적화 설정
-            applyMobileOptimizations() {
-                if (this.isMobileDevice()) {
-                    // 터치 이벤트 초기화
-                    this.initializeTouchEvents(sketchCanvas);
-
-                    // 모바일에서의 카메라 설정
-                    if (startCameraBtn) {
-                        startCameraBtn.addEventListener('click', async () => {
-                            try {
-                                const stream = await navigator.mediaDevices.getUserMedia({
-                                    video: {
-                                        facingMode: 'environment',
-                                        width: { ideal: 1280 },
-                                        height: { ideal: 720 }
-                                    }
-                                });
-                                // ... 기존 카메라 처리 코드 ...
-                            } catch (error) {
-                                console.error('Mobile camera error:', error);
-                                showToast('모바일 카메라 접근 중 오류가 발생했습니다.', 'error');
-                            }
-                        });
-                    }
-
-                    // 모바일에서의 스크롤 최적화
-                    document.querySelectorAll('.screenshot-container').forEach(container => {
-                        container.style.webkitOverflowScrolling = 'touch';
-                    });
-
-                    // 모바일에서의 버튼 크기 조정
-                    document.querySelectorAll('button').forEach(button => {
-                        button.style.minHeight = '44px'; // iOS 권장 최소 터치 영역
-                        button.style.minWidth = '44px';
-                    });
-                }
-            }
-        };
-
-        // 페이지 로드 시 모바일 최적화 적용
-        window.addEventListener('load', () => {
-            mobileOptimizer.applyMobileOptimizations();
-        });
-
-        // 화면 방향 변경 시 처리
-        window.addEventListener('orientationchange', () => {
-            // 캔버스 크기 재조정
-            if (sketchCanvas) {
-                const ctx = sketchCanvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, sketchCanvas.width, sketchCanvas.height);
-                
-                sketchCanvas.width = sketchCanvas.offsetWidth;
-                sketchCanvas.height = sketchCanvas.offsetHeight;
-                
-                ctx.putImageData(imageData, 0, 0);
-            }
-
-            // 카메라 피드 재조정
-            if (cameraFeed && cameraFeed.srcObject) {
-                cameraFeed.style.width = '100%';
-                cameraFeed.style.height = 'auto';
-            }
-        });
-
-        // 회원가입 및 로그인 관련 기능
-        const authManager = {
-            // 사용자 상태 관리
-            userState: {
-                isLoggedIn: false,
-                userData: null
-            },
-
-            // 회원가입 처리
-            async handleSignup(event) {
-                event.preventDefault();
-                const form = event.target;
-                const email = form.elements.email.value;
-                const password = form.elements.password.value;
-
-                try {
-                    setButtonLoading(form.querySelector('button[type="submit"]'), true);
-                    
-                    // 실제 서버 연동 시 사용할 코드
-                    // const response = await fetch('/api/signup', {
-                    //     method: 'POST',
-                    //     headers: { 'Content-Type': 'application/json' },
-                    //     body: JSON.stringify({ email, password })
-                    // });
-                    
-                    // 임시 성공 처리
-                    this.userState.isLoggedIn = true;
-                    this.userState.userData = { email };
-                    
-                    showToast('회원가입이 완료되었습니다!', 'success');
-                    this.updateUIForLoggedInUser();
-                    
-                    // 앱 설치 프롬프트 표시
-                    this.showInstallPrompt();
-                } catch (error) {
-                    console.error('Signup error:', error);
-                    showToast('회원가입 중 오류가 발생했습니다.', 'error');
-                } finally {
-                    setButtonLoading(form.querySelector('button[type="submit"]'), false);
-                }
-            },
-
-            // 로그인 처리
-            async handleLogin(event) {
-                event.preventDefault();
-                const form = event.target;
-                const email = form.elements.email.value;
-                const password = form.elements.password.value;
-
-                try {
-                    setButtonLoading(form.querySelector('button[type="submit"]'), true);
-                    
-                    // 실제 서버 연동 시 사용할 코드
-                    // const response = await fetch('/api/login', {
-                    //     method: 'POST',
-                    //     headers: { 'Content-Type': 'application/json' },
-                    //     body: JSON.stringify({ email, password })
-                    // });
-                    
-                    // 임시 성공 처리
-                    this.userState.isLoggedIn = true;
-                    this.userState.userData = { email };
-                    
-                    showToast('로그인되었습니다!', 'success');
-                    this.updateUIForLoggedInUser();
-                } catch (error) {
-                    console.error('Login error:', error);
-                    showToast('로그인 중 오류가 발생했습니다.', 'error');
-                } finally {
-                    setButtonLoading(form.querySelector('button[type="submit"]'), false);
-                }
-            },
-
-            // 소셜 로그인 처리
-            async handleSocialLogin(provider) {
-                try {
-                    setButtonLoading(document.getElementById(`${provider}LoginBtn`), true);
-                    
-                    // 실제 소셜 로그인 연동 시 사용할 코드
-                    // const response = await fetch(`/api/auth/${provider}`, {
-                    //     method: 'POST'
-                    // });
-                    
-                    // 임시 성공 처리
-                    this.userState.isLoggedIn = true;
-                    this.userState.userData = { email: `${provider}@example.com` };
-                    
-                    showToast(`${provider} 계정으로 로그인되었습니다!`, 'success');
-                    this.updateUIForLoggedInUser();
-                } catch (error) {
-                    console.error(`${provider} login error:`, error);
-                    showToast(`${provider} 로그인 중 오류가 발생했습니다.`, 'error');
-                } finally {
-                    setButtonLoading(document.getElementById(`${provider}LoginBtn`), false);
-                }
-            },
-
-            // UI 업데이트
-            updateUIForLoggedInUser() {
-                const signupSection = document.getElementById('signup');
-                const loginSection = document.getElementById('login');
-                
-                if (this.userState.isLoggedIn) {
-                    // 로그인 상태 UI로 변경
-                    if (signupSection) signupSection.classList.add('hidden');
-                    if (loginSection) loginSection.classList.add('hidden');
-                    
-                    // 사용자 메뉴 표시
-                    this.showUserMenu();
-                }
-            },
-
-            // 사용자 메뉴 표시
-            showUserMenu() {
-                const userMenu = document.createElement('div');
-                userMenu.className = 'fixed top-16 right-4 bg-white shadow-lg rounded-lg p-4 z-50';
-                userMenu.innerHTML = `
-                    <div class="text-sm">
-                        <p class="font-semibold">${this.userState.userData.email}</p>
-                        <button id="logoutBtn" class="mt-2 text-red-600 hover:text-red-800">로그아웃</button>
-                    </div>
-                `;
-                document.body.appendChild(userMenu);
-
-                // 로그아웃 버튼 이벤트
-                document.getElementById('logoutBtn').addEventListener('click', () => {
-                    this.handleLogout();
-                    userMenu.remove();
-                });
-            },
-
-            // 로그아웃 처리
-            handleLogout() {
-                this.userState.isLoggedIn = false;
-                this.userState.userData = null;
-                showToast('로그아웃되었습니다.', 'info');
-                window.location.reload();
-            }
-        };
-
-        // PWA 설치 관련 기능
-        const pwaManager = {
-            deferredPrompt: null,
-
-            // 설치 프롬프트 저장
-            saveInstallPrompt(event) {
-                event.preventDefault();
-                this.deferredPrompt = event;
-                this.showInstallBanner();
-            },
-
-            // 설치 배너 표시
-            showInstallBanner() {
-                const installBanner = document.getElementById('install-banner');
-                if (installBanner && !window.matchMedia('(display-mode: standalone)').matches) {
-                    installBanner.classList.remove('hidden');
-                }
-            },
-
-            // 앱 설치 처리
-            async handleInstall() {
-                if (!this.deferredPrompt) return;
-
-                try {
-                    setButtonLoading(document.getElementById('install-button'), true);
-                    this.deferredPrompt.prompt();
-                    const { outcome } = await this.deferredPrompt.userChoice;
-                    
-                    if (outcome === 'accepted') {
-                        showToast('앱이 설치되었습니다!', 'success');
-                    } else {
-                        showToast('앱 설치가 취소되었습니다.', 'info');
-                    }
-                } catch (error) {
-                    console.error('Installation error:', error);
-                    showToast('앱 설치 중 오류가 발생했습니다.', 'error');
-                } finally {
-                    setButtonLoading(document.getElementById('install-button'), false);
-                    this.deferredPrompt = null;
-                    document.getElementById('install-banner').classList.add('hidden');
-                }
-            }
-        };
-
-        // 이벤트 리스너 등록
-        document.addEventListener('DOMContentLoaded', () => {
-            // 회원가입 폼
-            const signupForm = document.getElementById('signupForm');
-            if (signupForm) {
-                signupForm.addEventListener('submit', (e) => authManager.handleSignup(e));
-            }
-
-            // 로그인 폼
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', (e) => authManager.handleLogin(e));
-            }
-
-            // 소셜 로그인 버튼
-            const socialProviders = ['google', 'kakao', 'naver'];
-            socialProviders.forEach(provider => {
-                const btn = document.getElementById(`${provider}LoginBtn`);
-                if (btn) {
-                    btn.addEventListener('click', () => authManager.handleSocialLogin(provider));
-                }
-            });
-
-            // PWA 설치 관련
-            window.addEventListener('beforeinstallprompt', (e) => pwaManager.saveInstallPrompt(e));
-            const installButton = document.getElementById('install-button');
-            if (installButton) {
-                installButton.addEventListener('click', () => pwaManager.handleInstall());
-            }
-        });
-
-        // 오프라인 지원
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful');
-                    })
-                    .catch(error => {
-                        console.error('ServiceWorker registration failed:', error);
-                    });
-            });
-        }
-
-    </script>
+    <!-- 알림 패널 -->
+    <div id="notificationPanel" class="fixed top-20 right-4 w-80 bg-white rounded-xl shadow-2xl p-4 z-50 hidden">
+        <h3 class="font-semibold text-gray-800 mb-3">알림</h3>
+        <div class="space-y-2">
+            <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                <p class="text-sm font-medium text-blue-800">토너먼트 시작 1시간 전</p>
+                <p class="text-xs text-blue-600">주말 스피드 마스터</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 성공 모달 -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-3xl mx-auto mb-4 animate-pulse">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">수고하셨습니다!</h2>
+                <p id="successMessage" class="text-gray-600 mb-6">연습을 성공적으로 완료했습니다.</p>
+                <div id="resultStats" class="bg-gray-50 rounded-xl p-4 mb-6"></div>
+                <div class="flex space-x-3">
+                    <button onclick="closeModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                        닫기
+                    </button>
+                    <button onclick="nextLevel()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
+                        다음 레벨
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
-</html> 
+</html>

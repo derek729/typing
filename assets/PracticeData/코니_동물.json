@@ -1,0 +1,12 @@
+{
+  "Name": "코니와 함께하는 동물 타자",
+  "Author": "OpenTyping",
+  "TextData": [
+    "코끼리", "기린", "사자", "북극곰", "고래", "문어", "토끼", "여우", "다람쥐", "거북이"
+  ],
+  "Character": "Korean",
+  "Image": "koni.png",
+  "BackgroundColor": "#E3F2FD",
+  "Compliments": ["잘했어요!", "멋져요!", "최고예요!", "코니가 응원해요!"],
+  "RewardIcon": "star.png"
+} 

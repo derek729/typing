@@ -1,51 +1,61 @@
 {
-    "name": "QUESTION - AI 사물 스케치 & 이름 찾기",
-    "short_name": "QUESTION",
-    "description": "아이들의 호기심을 채워주는 AI 기반 사물 스케치 및 이름 찾기 앱",
+    "name": "OpenTyping Pro - 온라인 타자 연습",
+    "short_name": "OpenTyping",
+    "description": "한컴 타자 스타일 온라인 타자 연습 프로그램 - 속도와 정확도를 동시에!",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#4F46E5",
+    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+    "background_color": "#ffffff",
     "theme_color": "#4F46E5",
-    "orientation": "portrait",
+    "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "img/icons/question_icon_192.png",
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzRGNDZFNSIvPgo8c3ZnIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjgiIHk9IjgiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIGQ9Ik00LjY2NyA2LjY2N0g1LjMzM1Y2SDQuNjY3VjYuNjY3Wk02LjY2NyA2LjY2N0g3LjMzM1Y2SDYuNjY3VjYuNjY3Wk04LjY2NyA2LjY2N0g5LjMzM1Y2SDguNjY3VjYuNjY3Wk0zLjMzMyA4SDQuNjY3VjdIMy4zM1Y4Wk02LjY2NyA4SDguVjdINi42NjdWOEg5LjMzM1Y3SDEwLjY2N1Y4SDkuMzMzWk0zLjMzMyA5LjMzM0g0LjY2N1Y4LjY2N0gzLjMzM1Y5LjMzM1pNNi42NjcgOS4zMzMgRDguNjY3VjguNjY3SDYuNjY3VjkuMzMzWk0xMC42NjcgOS4zMzMgQDExLjMzM1Y4LjY2N0gxMC42NjdWOS4zMzNaTTQuNjY3IDEwLjY2N0g1LjMzM1YxMC4wSDQuNjY3VjEwLjY2N1pNNi42NjcgMTAuNjY3SDcuMzMzVjEwLjY2N0g2LjY2N1YxMC42NjdaTTguNjY3IDEwLjY2N0g5LjMzM1YxMC4wSDguNjY3VjEwLjY2N1pNMTAuNjY3IDEwLjY2N0gxMS4zMzMgQjEwLjY2N1YxMC42NjdaWiIgZmlsbD0iIzRGNDZFNSIvPgo8L3N2Zz4KPC9zdmc+",
+            "sizes": "32x32",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0RjQ2RTUiLz4KPHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0OCIgeT0iNDgiPgo8cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIxMiIgZmlsbD0iI0ZGRkZGRiIvPgo8cGF0aCBkPSJNMjggNDBIMzJWMzZIMjhWNDBaTTQwIDQwSDQ0VjM2SDQwVjQwWk01MiA0MEg1NlYzNkg1MlY0MFpNNjQgNDBINjhWMzZINjRWNDBaTTIwIDQ4SDI0VjQ0SDIwVjQ4Wk0zMiA0OEgzNlY0NEgzMlY0OFpNNDQgNDgINDhWNDhINDRWNDhaTTU2IDQ4SDYwVjQ0SDU2VjQ4Wk02OCA0OEg3MlY0NEg2OFY0OFpNMjggNTZIMzJWNTJIMjhWNTZaTTQwIDU2SDQ0VjUySDQwVjU2Wk01MiA1Nkg1NlY1Mkg1MlY1Nlo2NCA1Nkg2OFY1Mkg2NFY1NloiIGZpbGw9IiM0RjQ2RTUiLz4KPC9zdmc+Cjwvc3ZnPgo=",
             "sizes": "192x192",
-            "type": "image/png",
+            "type": "image/svg+xml",
             "purpose": "any maskable"
         },
         {
-            "src": "img/icons/question_icon_512.png",
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiM0RjQ2RTUiLz4KPHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMTI4IiB5PSIxMjgiPgo8cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgcng9IjMyIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIGQ9Ik03NCAxMDgIODhWMTAwSDc0VjEwOFpNMTA0IDEwOEgxMTZWMTAwSDEwNFYxMDhaTTEzNCAxMDhIMTQ4VjEwMEgxMzRWMTA4Wk0xNjQgMTA4SDE3OFYxMDBIMTY0VjEwOFpNNDggMTMySDU2VjEyMEg0OFYxMzJaTTgwIDEzMjw4VjEyMEg4MFYxMzJaTDk2IDEzMkgxMDRWMTIwSDk2VjEzMlopTTEyMCAxMzJIMTI4VjEyMEgxMjBWMTMyWk0xNDQgMTMySDE1MlYxMjBIMTQ0VjEzMlopTTE2MCAxMzJIMTY4VjEyMEgxNjBWMTMyWk0xNzYgMTMySDE4NFYxMjBIMTc2VjEzMlopTTEwNCAxNTZIMTEyVjE0OEgxMDRWMTU2Wk0xMzAgMTU2SDEzOFYxNDggSDEzMFYxNTZaTTE1NiAxNTZIMTY0VjE0OEgxNTZWMTU2Wk03NCAxODAINzhWMTcySDc0VjE4MFpNMTA0IDE4MEgxMTZWMTcySDEwNFYxODBaTTEzNCAxODBIMTQ4VjE3MkgxMzRWMTgwWk0xNjQgMTgwSDE3OFYxNzJIMTY0VjE4MFoiIGZpbGw9IiM0RjQ2RTUiLz4KPC9zdmc+Cjwvc3ZnPgo=",
             "sizes": "512x512",
-            "type": "image/png",
+            "type": "image/svg+xml",
             "purpose": "any maskable"
         }
     ],
-    "screenshots": [
-        {
-            "src": "img/mockup_screen1.jpg",
-            "sizes": "1080x1920",
-            "type": "image/jpeg",
-            "platform": "narrow",
-            "label": "QUESTION 앱 스케치 변환 준비 화면"
-        },
-        {
-            "src": "img/mockup_screen2.jpg",
-            "sizes": "1080x1920",
-            "type": "image/jpeg",
-            "platform": "narrow",
-            "label": "QUESTION 앱 스케치 완성 및 색칠 화면"
-        },
-        {
-            "src": "img/mockup_screen3.jpg",
-            "sizes": "1080x1920",
-            "type": "image/jpeg",
-            "platform": "narrow",
-            "label": "QUESTION 앱 동물 이름 알려주기 화면"
-        }
-    ],
-    "categories": ["education", "kids", "utilities"],
+    "categories": ["education", "productivity", "utilities"],
     "lang": "ko",
     "dir": "ltr",
-    "prefer_related_applications": false
-} 
+    "scope": "/",
+    "prefer_related_applications": false,
+    "screenshots": [
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjU2OCIgdmlld0JveD0iMCAwIDMyMCA1NjgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iNTY4IiBmaWxsPSIjRjlGQUZCIi8+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iODAiIGZpbGw9IiM0RjQ2RTUiLz4KPHRleHQgeD0iMTYwIiB5PSI0MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4IiBmaWxsPSJ3aGl0ZSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+T3BlblR5cGluZyBQcm88L3RleHQ+CjxyZWN0IHg9IjIwIiB5PSIxMDAiIHdpZHRoPSIyODAiIGhlaWdodD0iMjAwIiByeD0iMTIiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjE2MCIgeT0iMjAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiMzMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPu2ZhOuUqeWbvueJh+2VqOyKpOyalCDtlZjrlr7nsooE8L3RleHQ+Cjwvc3ZnPg==",
+            "sizes": "320x568",
+            "type": "image/svg+xml",
+            "form_factor": "narrow"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "빠른 연습",
+            "short_name": "연습",
+            "description": "타자 연습 바로 시작하기",
+            "url": "/?action=practice",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iMjQiIGZpbGw9IiMxMEI5ODEiLz4KPHRleHQgeD0iMjQiIHk9IjI4IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7so7w8L3RleHQ+Cjwvc3ZnPg==",
+                    "sizes": "48x48"
+                }
+            ]
+        }
+    ],
+    "edge_side_panel": {
+        "preferred_width": 400
+    }
+}

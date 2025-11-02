@@ -1,0 +1,12 @@
+{
+  "Name": "희니와 함께하는 겨울 타자",
+  "Author": "OpenTyping",
+  "TextData": [
+    "눈사람", "눈송이", "목도리", "장갑", "스키", "썰매", "코트", "귀마개", "핫초코", "펭귄"
+  ],
+  "Character": "Korean",
+  "Image": "hini.png",
+  "BackgroundColor": "#E1F5FE",
+  "Compliments": ["희니가 응원해요!", "정말 잘했어요!", "멋져요!", "최고예요!"],
+  "RewardIcon": "star.png"
+} 
