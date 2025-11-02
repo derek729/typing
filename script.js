@@ -1652,10 +1652,10 @@ function quickStart(level) {
 
 function joinTournament(tournamentId) {
     console.log('OpenTyping Pro: 토너먼트 참가 -', tournamentId);
-    if (app && typeof app.joinTournament === 'function') {
-        app.joinTournament(tournamentId);
+    if (tournamentManager) {
+        tournamentManager.joinTournament(tournamentId);
     } else {
-        alert('토너먼트 참가 기능은 준비중입니다.');
+        alert('토너먼트 매니저가 초기화되지 않았습니다.');
     }
 }
 
@@ -2738,8 +2738,1195 @@ class LanguageManager {
     }
 }
 
+// 토너먼트 관리 시스템
+class TournamentManager {
+    constructor() {
+        this.tournaments = this.initializeTournaments();
+        this.activeTournaments = new Map();
+        this.userTournaments = [];
+    }
+
+    initializeTournaments() {
+        return {
+            weekend: {
+                id: 'weekend',
+                name: '주말 스피드 마스터',
+                description: '최고 속도를 겨루는 주말 특별 토너먼트',
+                prize: 100000,
+                firstPrize: 50000,
+                maxParticipants: 500,
+                currentParticipants: 256,
+                endTime: new Date(Date.now() + 2 * 60 * 60 * 1000 + 15 * 60 * 1000), // 2시간 15분 후
+                difficulty: 'hard',
+                type: 'speed',
+                status: 'active'
+            },
+            accuracy: {
+                id: 'accuracy',
+                name: '정확성 챔피언',
+                description: '오타 없이 완벽한 타이핑 실력较量',
+                prize: 80000,
+                firstPrize: 40000,
+                maxParticipants: 300,
+                currentParticipants: 189,
+                endTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24시간 후
+                difficulty: 'medium',
+                type: 'accuracy',
+                status: 'active'
+            },
+            rookie: {
+                id: 'rookie',
+                name: '초보자 리그',
+                description: '초보자들을 위한 친선 대회',
+                prize: 50000,
+                firstPrize: 25000,
+                maxParticipants: 200,
+                currentParticipants: 124,
+                endTime: new Date(Date.now() + 3 * 60 * 60 * 1000), // 3시간 후
+                difficulty: 'easy',
+                type: 'beginner',
+                status: 'active'
+            }
+        };
+    }
+
+    joinTournament(tournamentId) {
+        const tournament = this.tournaments[tournamentId];
+        if (!tournament) {
+            this.showMessage('존재하지 않는 토너먼트입니다.');
+            return;
+        }
+
+        if (tournament.status !== 'active') {
+            this.showMessage('이미 종료된 토너먼트입니다.');
+            return;
+        }
+
+        if (tournament.currentParticipants >= tournament.maxParticipants) {
+            this.showMessage('참가 인원이 가득 찼습니다.');
+            return;
+        }
+
+        if (this.userTournaments.includes(tournamentId)) {
+            this.showMessage('이미 참가한 토너먼트입니다.');
+            return;
+        }
+
+        // 참가 처리
+        tournament.currentParticipants++;
+        this.userTournaments.push(tournamentId);
+        this.activeTournaments.set(tournamentId, {
+            joinedAt: new Date(),
+            progress: 0,
+            bestScore: 0,
+            attempts: 0
+        });
+
+        // 로컬 스토리지에 저장
+        this.saveProgress();
+
+        this.showMessage(`${tournament.name}에 성공적으로 참가했습니다!`);
+        this.updateTournamentUI();
+
+        // 토너먼트 시작 안내
+        setTimeout(() => {
+            this.showTournamentStartModal(tournament);
+        }, 1000);
+    }
+
+    showTournamentStartModal(tournament) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform scale-0 animate-scale-in">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-trophy text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">토너먼트 참가 성공!</h3>
+                    <p class="text-gray-600 mb-6">${tournament.name}에 참가하셨습니다.</p>
+
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-2">토너먼트 정보</h4>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>참가자 수:</span>
+                                <span class="font-semibold">${tournament.currentParticipants}/${tournament.maxParticipants}명</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>남은 시간:</span>
+                                <span class="font-semibold">${this.formatTimeRemaining(tournament.endTime)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>1위 상금:</span>
+                                <span class="font-semibold text-green-600">${tournament.firstPrize.toLocaleString()}원</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                            나중에
+                        </button>
+                        <button onclick="tournamentManager.startTournament('${tournament.id}'); this.closest('.fixed').remove();" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
+                            바로 시작
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        setTimeout(() => {
+            modal.querySelector('.animate-scale-in').style.transform = 'scale(1)';
+        }, 100);
+    }
+
+    startTournament(tournamentId) {
+        const tournament = this.tournaments[tournamentId];
+        if (!tournament) return;
+
+        // 연습 모드로 이동하여 토너먼트 시작
+        showSection('practice');
+
+        // 토너먼트 모드로 설정
+        setTimeout(() => {
+            if (typeof app !== 'undefined' && app.startTournamentMode) {
+                app.startTournamentMode(tournamentId, tournament);
+            }
+        }, 500);
+    }
+
+    submitTournamentScore(tournamentId, wpm, accuracy, errors) {
+        const tournamentData = this.activeTournaments.get(tournamentId);
+        if (!tournamentData) return;
+
+        tournamentData.attempts++;
+        const score = this.calculateTournamentScore(wpm, accuracy, errors, tournamentId);
+
+        if (score > tournamentData.bestScore) {
+            tournamentData.bestScore = score;
+            tournamentData.progress = Math.min(100, (score / 1000) * 100); // 간단한 진행률 계산
+        }
+
+        this.saveProgress();
+        this.updateTournamentUI();
+
+        // 결과 표시
+        this.showTournamentResult(tournamentId, score, wpm, accuracy);
+    }
+
+    calculateTournamentScore(wpm, accuracy, errors, tournamentId) {
+        const tournament = this.tournaments[tournamentId];
+        let baseScore = wpm * 10; // 기본 점수
+
+        // 정확도 보너스
+        baseScore *= (accuracy / 100);
+
+        // 토너먼트 타입별 보너스
+        switch (tournament.type) {
+            case 'speed':
+                baseScore *= 1.5;
+                break;
+            case 'accuracy':
+                baseScore *= (accuracy / 95); // 정확도가 높을수록 더 많은 보너스
+                break;
+            case 'beginner':
+                baseScore *= 1.2;
+                break;
+        }
+
+        // 오류 페널티
+        baseScore = Math.max(0, baseScore - (errors * 50));
+
+        return Math.round(baseScore);
+    }
+
+    showTournamentResult(tournamentId, score, wpm, accuracy) {
+        const tournament = this.tournaments[tournamentId];
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-star text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2">토너먼트 결과!</h3>
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="text-3xl font-bold text-indigo-600 mb-2">${score.toLocaleString()}점</div>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <div class="text-gray-600">속도</div>
+                                <div class="font-semibold">${wpm} WPM</div>
+                            </div>
+                            <div>
+                                <div class="text-gray-600">정확도</div>
+                                <div class="font-semibold">${accuracy}%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 rounded-xl p-4 mb-6">
+                        <p class="text-blue-800 text-sm">현재 ${tournament.currentParticipants}명 중 랭킹을 계산 중입니다...</p>
+                    </div>
+
+                    <button onclick="this.closest('.fixed').remove()" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
+                        확인
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    formatTimeRemaining(endTime) {
+        const now = new Date();
+        const remaining = endTime - now;
+
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (hours > 0) {
+            return `${hours}시간 ${minutes}분`;
+        } else {
+            return `${minutes}분`;
+        }
+    }
+
+    updateTournamentUI() {
+        // 참가 버튼 업데이트
+        Object.keys(this.tournaments).forEach(tournamentId => {
+            const tournament = this.tournaments[tournamentId];
+            const isJoined = this.userTournaments.includes(tournamentId);
+
+            // 참가 버튼 찾기
+            const buttons = document.querySelectorAll(`[onclick="joinTournament('${tournamentId}')"]`);
+            buttons.forEach(button => {
+                if (isJoined) {
+                    button.textContent = '참가 완료';
+                    button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    button.classList.remove('bg-white', 'text-orange-500');
+                    button.disabled = true;
+                }
+            });
+        });
+    }
+
+    saveProgress() {
+        const data = {
+            userTournaments: this.userTournaments,
+            activeTournaments: Array.from(this.activeTournaments.entries()),
+            tournaments: this.tournaments
+        };
+        localStorage.setItem('tournamentData', JSON.stringify(data));
+    }
+
+    loadProgress() {
+        const saved = localStorage.getItem('tournamentData');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                this.userTournaments = data.userTournaments || [];
+                this.activeTournaments = new Map(data.activeTournaments || []);
+                this.tournaments = data.tournaments || this.tournaments;
+                this.updateTournamentUI();
+            } catch (e) {
+                console.error('Failed to load tournament data:', e);
+            }
+        }
+    }
+
+    showMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+}
+
+// 이벤트 관리 시스템
+class EventManager {
+    constructor() {
+        this.events = this.initializeEvents();
+        this.userEvents = [];
+        this.eventProgress = new Map();
+    }
+
+    initializeEvents() {
+        return {
+            yearEndChallenge: {
+                id: 'yearEndChallenge',
+                name: '연말 챌린지',
+                description: '10일간 매일 미션 완료하고 특별 보상 받기!',
+                rewards: ['골드 배지', '500 포인트', '한정 티켓', 'VIP 1일권'],
+                duration: 10,
+                endTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000 + 12 * 60 * 60 * 1000), // 5일 12시간 후
+                type: 'daily',
+                difficulty: 'medium',
+                status: 'active',
+                tasks: [
+                    { id: 'day1', name: '첫날 도전', description: '기본 연습 완료하기', completed: false },
+                    { id: 'day2', name: '속도 도전', description: '60 WPM 달성하기', completed: false },
+                    { id: 'day3', name: '정확성 도전', description: '95% 정확도 달성하기', completed: false },
+                    { id: 'day4', name: '장문 도전', description: '5분 연속 타이핑하기', completed: false },
+                    { id: 'day5', name: '복습 도전', description: '모든 과정 복습하기', completed: false },
+                    { id: 'day6', name: '심화 도전', description: '숫자 타이핑 연습하기', completed: false },
+                    { id: 'day7', name: '특수문자 도전', description: '특수문자 연습하기', completed: false },
+                    { id: 'day8', name: '영문 도전', description: '영문 단어 연습하기', completed: false },
+                    { id: 'day9', name: '한글 도전', description: '한글 문장 연습하기', completed: false },
+                    { id: 'day10', name: '최종 도전', description: '최고 기록 경신하기', completed: false }
+                ]
+            },
+            speedChallenge: {
+                id: 'speedChallenge',
+                name: '속도의 신 챌린지',
+                description: '속도의 한계를 넘어서세요!',
+                rewards: ['속도 마스터 칭호', '1000 포인트', '레어 아이템'],
+                duration: 3,
+                endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000), // 3일 8시간 후
+                type: 'achievement',
+                difficulty: 'hard',
+                status: 'active',
+                tasks: [
+                    { id: 'speed1', name: '초급 속도', description: '40 WPM 달성', completed: false, target: 40 },
+                    { id: 'speed2', name: '중급 속도', description: '60 WPM 달성', completed: false, target: 60 },
+                    { id: 'speed3', name: '고급 속도', description: '80 WPM 달성', completed: false, target: 80 },
+                    { id: 'speed4', name: '전문가 속도', description: '100 WPM 달성', completed: false, target: 100 },
+                    { id: 'speed5', name: '레전드 속도', description: '120 WPM 달성', completed: false, target: 120 }
+                ]
+            },
+            accuracyMaster: {
+                id: 'accuracyMaster',
+                name: '정확성 마스터',
+                description: '완벽한 타이핑 실력을 증명하세요!',
+                rewards: ['정확성 마스터 칭호', '750 포인트', '정확성 강화 아이템'],
+                duration: 7,
+                endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7일 후
+                type: 'achievement',
+                difficulty: 'medium',
+                status: 'active',
+                tasks: [
+                    { id: 'acc1', name: '기본 정확성', description: '90% 정확도 달성', completed: false, target: 90 },
+                    { id: 'acc2', name: '중급 정확성', description: '95% 정확도 달성', completed: false, target: 95 },
+                    { id: 'acc3', name: '고급 정확성', description: '98% 정확도 달성', completed: false, target: 98 },
+                    { id: 'acc4', name: '완벽 정확성', description: '100% 정확도 달성', completed: false, target: 100 }
+                ]
+            }
+        };
+    }
+
+    joinEvent(eventId) {
+        const event = this.events[eventId];
+        if (!event) {
+            this.showMessage('존재하지 않는 이벤트입니다.');
+            return;
+        }
+
+        if (event.status !== 'active') {
+            this.showMessage('이미 종료된 이벤트입니다.');
+            return;
+        }
+
+        if (this.userEvents.includes(eventId)) {
+            this.showMessage('이미 참여한 이벤트입니다.');
+            return;
+        }
+
+        // 참여 처리
+        this.userEvents.push(eventId);
+        this.eventProgress.set(eventId, {
+            joinedAt: new Date(),
+            completedTasks: [],
+            overallProgress: 0,
+            rewardsClaimed: false
+        });
+
+        // 로컬 스토리지에 저장
+        this.saveProgress();
+
+        this.showMessage(`${event.name}에 참여했습니다!`);
+        this.updateEventUI();
+
+        // 이벤트 상세 모달 표시
+        setTimeout(() => {
+            this.showEventDetailModal(event);
+        }, 1000);
+    }
+
+    showEventDetailModal(event) {
+        const progress = this.eventProgress.get(event.id);
+        const completedCount = progress ? progress.completedTasks.length : 0;
+        const progressPercentage = (completedCount / event.tasks.length) * 100;
+
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-calendar-star text-white text-3xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-2">${event.name}</h3>
+                    <p class="text-gray-600">${event.description}</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">보상</h4>
+                        <div class="space-y-1">
+                            ${event.rewards.map(reward => `
+                                <div class="flex items-center text-sm">
+                                    <i class="fas fa-gift text-purple-500 mr-2"></i>
+                                    <span>${reward}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">진행 정보</h4>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span>남은 시간:</span>
+                                <span class="font-semibold">${this.formatTimeRemaining(event.endTime)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>진행률:</span>
+                                <span class="font-semibold">${completedCount}/${event.tasks.length} 완료</span>
+                            </div>
+                            <div class="progress-bar h-2 mt-2">
+                                <div class="progress-fill bg-gradient-to-r from-purple-500 to-pink-500" style="width: ${progressPercentage}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-semibold text-gray-800 mb-3">미션 목록</h4>
+                    <div class="space-y-2 max-h-60 overflow-y-auto">
+                        ${event.tasks.map((task, index) => {
+                            const isCompleted = progress && progress.completedTasks.includes(task.id);
+                            return `
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg ${isCompleted ? 'opacity-75' : ''}">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 ${isCompleted ? 'bg-green-100' : 'bg-gray-200'} rounded-full flex items-center justify-center">
+                                            ${isCompleted ?
+                                                '<i class="fas fa-check text-green-600 text-xs"></i>' :
+                                                `<span class="text-xs font-semibold text-gray-600">${index + 1}</span>`
+                                            }
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-gray-800 ${isCompleted ? 'line-through' : ''}">${task.name}</div>
+                                            <div class="text-sm text-gray-600">${task.description}</div>
+                                        </div>
+                                    </div>
+                                    ${isCompleted ?
+                                        '<span class="text-green-600 text-sm font-semibold">완료</span>' :
+                                        '<span class="text-gray-400 text-sm">미완료</span>'
+                                    }
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div class="flex space-x-3">
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                        닫기
+                    </button>
+                    ${completedCount === event.tasks.length && !progress?.rewardsClaimed ?
+                        `<button onclick="eventManager.claimRewards('${event.id}'); this.closest('.fixed').remove();" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transition">
+                            보상 받기
+                        </button>` :
+                        `<button onclick="showSection('practice'); this.closest('.fixed').remove();" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
+                            도전하기
+                        </button>`
+                    }
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    completeTask(eventId, taskId, performanceData = {}) {
+        const event = this.events[eventId];
+        const progress = this.eventProgress.get(eventId);
+
+        if (!event || !progress) return;
+
+        const task = event.tasks.find(t => t.id === taskId);
+        if (!task || progress.completedTasks.includes(taskId)) return;
+
+        // 과제 완료 조건 확인
+        let isCompleted = false;
+
+        if (task.target && performanceData.wpm) {
+            // 속도 관련 과제
+            isCompleted = performanceData.wpm >= task.target;
+        } else if (task.target && performanceData.accuracy) {
+            // 정확도 관련 과제
+            isCompleted = performanceData.accuracy >= task.target;
+        } else if (taskId.includes('day')) {
+            // 일일 과제 - 기본 연습 완료로 처리
+            isCompleted = performanceData.duration >= 300; // 5분 이상 연습
+        } else {
+            // 기타 과제
+            isCompleted = true;
+        }
+
+        if (isCompleted) {
+            progress.completedTasks.push(taskId);
+            progress.overallProgress = (progress.completedTasks.length / event.tasks.length) * 100;
+
+            this.saveProgress();
+            this.updateEventUI();
+
+            // 과제 완료 알림
+            this.showTaskCompleteNotification(task.name, event.name);
+        }
+    }
+
+    claimRewards(eventId) {
+        const event = this.events[eventId];
+        const progress = this.eventProgress.get(eventId);
+
+        if (!event || !progress || progress.rewardsClaimed) return;
+
+        if (progress.completedTasks.length !== event.tasks.length) {
+            this.showMessage('모든 미션을 완료해야 보상을 받을 수 있습니다.');
+            return;
+        }
+
+        progress.rewardsClaimed = true;
+        this.saveProgress();
+
+        // 보상 지급 모달
+        this.showRewardClaimModal(event);
+    }
+
+    showRewardClaimModal(event) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <i class="fas fa-trophy text-white text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">축하합니다!</h3>
+                <p class="text-gray-600 mb-6">${event.name}의 모든 미션을 완료했습니다!</p>
+
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 mb-6">
+                    <h4 class="font-semibold text-gray-800 mb-3">받은 보상</h4>
+                    <div class="space-y-2">
+                        ${event.rewards.map(reward => `
+                            <div class="flex items-center justify-between text-sm">
+                                <span>${reward}</span>
+                                <i class="fas fa-check-circle text-green-500"></i>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <button onclick="this.closest('.fixed').remove()" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 rounded-xl font-semibold hover:from-yellow-600 hover:to-orange-600 transition">
+                    확인
+                </button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    showTaskCompleteNotification(taskName, eventName) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg z-50 animate-slide-in max-w-sm';
+        notification.innerHTML = `
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-check-circle text-2xl"></i>
+                <div>
+                    <div class="font-semibold">미션 완료!</div>
+                    <div class="text-sm opacity-90">${taskName} - ${eventName}</div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    formatTimeRemaining(endTime) {
+        const now = new Date();
+        const remaining = endTime - now;
+
+        const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (days > 0) {
+            return `${days}일 ${hours}시간`;
+        } else if (hours > 0) {
+            return `${hours}시간 ${minutes}분`;
+        } else {
+            return `${minutes}분`;
+        }
+    }
+
+    updateEventUI() {
+        // 이벤트 카드 업데이트
+        Object.keys(this.events).forEach(eventId => {
+            const event = this.events[eventId];
+            const progress = this.eventProgress.get(eventId);
+            const isJoined = this.userEvents.includes(eventId);
+
+            // 이벤트 참여 버튼 찾기
+            const buttons = document.querySelectorAll(`[onclick*="joinEvent('${eventId}')"]`);
+            buttons.forEach(button => {
+                if (isJoined) {
+                    button.textContent = '참여 중';
+                    button.classList.add('bg-green-500', 'text-white');
+                    button.classList.remove('bg-indigo-600');
+                    button.disabled = true;
+                }
+            });
+        });
+    }
+
+    saveProgress() {
+        const data = {
+            userEvents: this.userEvents,
+            eventProgress: Array.from(this.eventProgress.entries()),
+            events: this.events
+        };
+        localStorage.setItem('eventData', JSON.stringify(data));
+    }
+
+    loadProgress() {
+        const saved = localStorage.getItem('eventData');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                this.userEvents = data.userEvents || [];
+                this.eventProgress = new Map(data.eventProgress || []);
+                this.events = data.events || this.events;
+                this.updateEventUI();
+            } catch (e) {
+                console.error('Failed to load event data:', e);
+            }
+        }
+    }
+
+    showMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-purple-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+}
+
+// 커뮤니티 관리 시스템
+class CommunityManager {
+    constructor() {
+        this.posts = this.initializePosts();
+        this.userPosts = [];
+        this.comments = new Map();
+        this.likes = new Map();
+        this.currentUser = {
+            id: 'user_' + Date.now(),
+            name: '사용자',
+            level: 1,
+            avatar: 'U'
+        };
+    }
+
+    initializePosts() {
+        return [
+            {
+                id: 'post_1',
+                title: '타자 속도 150 WPM 돌파 기념!',
+                author: 'SpeedKing',
+                authorLevel: 15,
+                content: '3개월 동안 꾸준히 연습한 결과 드디어 150 WPM을 돌파했습니다. 처음에는 60 WPM도 어려웠는데, 매일 30분씩 꾸준히 한 결과가 크네요! 팁을 공유하자면...',
+                category: 'achievement',
+                likes: 234,
+                comments: 45,
+                views: 1250,
+                createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
+                isLiked: false,
+                isHot: true
+            },
+            {
+                id: 'post_2',
+                title: '정확도 향상 팁 공유합니다',
+                author: 'AccuracyPro',
+                authorLevel: 12,
+                content: '제가 정확도 98%를 유지하는 비법을 공유해드릴게요. 가장 중요한 것은 손목의 각도와 키보드 위치입니다...',
+                category: 'tips',
+                likes: 156,
+                comments: 23,
+                views: 890,
+                createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5시간 전
+                isLiked: false,
+                isHot: false
+            },
+            {
+                id: 'post_3',
+                title: '새로운 연습 방법 제안합니다',
+                author: 'PracticeMaster',
+                authorLevel: 8,
+                content: '기존의 연습 방법에 지친 분들을 위해 새로운 접근법을 제안합니다. 게임처럼 즐기면서 실력을 향상시킬 수 있는 방법...',
+                category: 'discussion',
+                likes: 89,
+                comments: 34,
+                views: 567,
+                createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000), // 8시간 전
+                isLiked: false,
+                isHot: false
+            },
+            {
+                id: 'post_4',
+                title: '토너먼트 같이 참가하실 분?',
+                author: 'TeamPlayer',
+                authorLevel: 6,
+                content: '이번 주말 토너먼트에 같이 참가하실 팀원을 구합니다. 실력은 상관없고, 함께 즐겁게 참여할 분이면 좋겠어요!',
+                category: 'recruit',
+                likes: 67,
+                comments: 18,
+                views: 432,
+                createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12시간 전
+                isLiked: false,
+                isHot: false
+            },
+            {
+                id: 'post_5',
+                title: '초보자분들을 위한 기본 자세 가이드',
+                author: 'BeginnerHelper',
+                authorLevel: 20,
+                content: '초보자분들이 가장 많이 하는 실수와 올바른 타이핑 자세를 사진과 함께 설명해드리겠습니다...',
+                category: 'guide',
+                likes: 312,
+                comments: 67,
+                views: 2100,
+                createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1일 전
+                isLiked: false,
+                isHot: true
+            }
+        ];
+    }
+
+    createPost(title, content, category = 'general') {
+        const newPost = {
+            id: 'post_' + Date.now(),
+            title: title,
+            author: this.currentUser.name,
+            authorLevel: this.currentUser.level,
+            content: content,
+            category: category,
+            likes: 0,
+            comments: 0,
+            views: 0,
+            createdAt: new Date(),
+            isLiked: false,
+            isHot: false
+        };
+
+        this.posts.unshift(newPost);
+        this.userPosts.push(newPost.id);
+        this.saveCommunityData();
+
+        this.showMessage('게시글이 작성되었습니다!');
+        this.refreshCommunityUI();
+
+        return newPost;
+    }
+
+    likePost(postId) {
+        const post = this.posts.find(p => p.id === postId);
+        if (!post) return;
+
+        const userLikes = this.likes.get(this.currentUser.id) || [];
+
+        if (userLikes.includes(postId)) {
+            // 좋아요 취소
+            post.likes--;
+            const index = userLikes.indexOf(postId);
+            userLikes.splice(index, 1);
+            post.isLiked = false;
+        } else {
+            // 좋아요 추가
+            post.likes++;
+            userLikes.push(postId);
+            post.isLiked = true;
+
+            // 인기 게시글 판정
+            if (post.likes > 200) {
+                post.isHot = true;
+            }
+        }
+
+        this.likes.set(this.currentUser.id, userLikes);
+        this.saveCommunityData();
+        this.updatePostUI(postId);
+    }
+
+    addComment(postId, content) {
+        const post = this.posts.find(p => p.id === postId);
+        if (!post) return;
+
+        const newComment = {
+            id: 'comment_' + Date.now(),
+            postId: postId,
+            author: this.currentUser.name,
+            authorLevel: this.currentUser.level,
+            content: content,
+            createdAt: new Date(),
+            likes: 0
+        };
+
+        if (!this.comments.has(postId)) {
+            this.comments.set(postId, []);
+        }
+
+        this.comments.get(postId).push(newComment);
+        post.comments++;
+        this.saveCommunityData();
+
+        this.showMessage('댓글이 작성되었습니다!');
+        return newComment;
+    }
+
+    showCreatePostModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl p-8 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-800">게시글 작성</h3>
+                    <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">제목</label>
+                        <input type="text" id="postTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="제목을 입력하세요..." maxlength="100">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
+                        <select id="postCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                            <option value="general">일반</option>
+                            <option value="achievement">성과 공유</option>
+                            <option value="tips">꿀팁 공유</option>
+                            <option value="discussion">토론</option>
+                            <option value="recruit">팀원 모집</option>
+                            <option value="guide">가이드</option>
+                            <option value="question">질문</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">내용</label>
+                        <textarea id="postContent" rows="8" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="내용을 입력하세요..." maxlength="2000"></textarea>
+                        <div class="text-right text-sm text-gray-500 mt-1">
+                            <span id="contentLength">0</span>/2000자
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm text-gray-600">
+                        <div class="flex items-center space-x-4">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="allowComments" checked class="mr-2">
+                                <span>댓글 허용</span>
+                            </label>
+                        </div>
+                        <div>
+                            <span class="text-xs">마크다운 형식 지원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-3 mt-6">
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+                        취소
+                    </button>
+                    <button onclick="communityManager.submitPost()" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition">
+                        작성하기
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // 글자 수 카운터
+        const contentTextarea = modal.querySelector('#postContent');
+        const lengthCounter = modal.querySelector('#contentLength');
+        contentTextarea.addEventListener('input', () => {
+            lengthCounter.textContent = contentTextarea.value.length;
+        });
+    }
+
+    submitPost() {
+        const title = document.getElementById('postTitle').value.trim();
+        const content = document.getElementById('postContent').value.trim();
+        const category = document.getElementById('postCategory').value;
+
+        if (!title || !content) {
+            this.showMessage('제목과 내용을 모두 입력해주세요.');
+            return;
+        }
+
+        if (title.length < 5) {
+            this.showMessage('제목은 최소 5자 이상이어야 합니다.');
+            return;
+        }
+
+        if (content.length < 20) {
+            this.showMessage('내용은 최소 20자 이상이어야 합니다.');
+            return;
+        }
+
+        const newPost = this.createPost(title, content, category);
+
+        // 모달 닫기
+        document.querySelector('.fixed').remove();
+
+        // 작성한 게시글로 이동
+        setTimeout(() => {
+            this.showPostDetail(newPost.id);
+        }, 500);
+    }
+
+    showPostDetail(postId) {
+        const post = this.posts.find(p => p.id === postId);
+        if (!post) return;
+
+        // 조회수 증가
+        post.views++;
+        this.saveCommunityData();
+
+        const comments = this.comments.get(postId) || [];
+
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+                <div class="p-6 border-b">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-2xl font-bold text-gray-800">${post.title}</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                ${post.author.charAt(0)}
+                            </div>
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-semibold">${post.author}</span>
+                                    <span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-semibold">Lv.${post.authorLevel}</span>
+                                    ${post.isHot ? '<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-semibold">🔥 인기</span>' : ''}
+                                </div>
+                                <div class="text-sm text-gray-500">${this.formatTime(post.createdAt)}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span><i class="fas fa-eye mr-1"></i>${post.views}</span>
+                            <span><i class="fas fa-heart mr-1"></i>${post.likes}</span>
+                            <span><i class="fas fa-comment mr-1"></i>${comments.length}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-6">
+                    <div class="prose max-w-none mb-6">
+                        <p class="text-gray-700 whitespace-pre-wrap">${post.content}</p>
+                    </div>
+
+                    <div class="flex items-center space-x-4 mb-6 pb-6 border-b">
+                        <button onclick="communityManager.likePost('${postId}'); communityManager.updatePostUI('${postId}');" class="flex items-center space-x-2 px-4 py-2 rounded-lg ${post.isLiked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'} hover:bg-red-100 hover:text-red-600 transition">
+                            <i class="fas fa-heart"></i>
+                            <span>${post.likes}</span>
+                        </button>
+                        <button class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+                            <i class="fas fa-share"></i>
+                            <span>공유</span>
+                        </button>
+                        <button class="flex items-center space-x-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition">
+                            <i class="fas fa-bookmark"></i>
+                            <span>저장</span>
+                        </button>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-4">댓글 (${comments.length})</h4>
+
+                        <div class="mb-4">
+                            <textarea id="commentContent" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="댓글을 입력하세요..." maxlength="500"></textarea>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-sm text-gray-500">
+                                    <span id="commentLength">0</span>/500자
+                                </span>
+                                <button onclick="communityManager.submitComment('${postId}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                                    댓글 작성
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            ${comments.map(comment => `
+                                <div class="flex space-x-3 p-4 bg-gray-50 rounded-lg">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                        ${comment.author.charAt(0)}
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center space-x-2 mb-1">
+                                            <span class="font-semibold">${comment.author}</span>
+                                            <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">Lv.${comment.authorLevel}</span>
+                                            <span class="text-sm text-gray-500">${this.formatTime(comment.createdAt)}</span>
+                                        </div>
+                                        <p class="text-gray-700">${comment.content}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // 댓글 글자 수 카운터
+        const commentTextarea = modal.querySelector('#commentContent');
+        const lengthCounter = modal.querySelector('#commentLength');
+        commentTextarea.addEventListener('input', () => {
+            lengthCounter.textContent = commentTextarea.value.length;
+        });
+    }
+
+    submitComment(postId) {
+        const content = document.getElementById('commentContent').value.trim();
+
+        if (!content) {
+            this.showMessage('댓글 내용을 입력해주세요.');
+            return;
+        }
+
+        if (content.length < 5) {
+            this.showMessage('댓글은 최소 5자 이상이어야 합니다.');
+            return;
+        }
+
+        const newComment = this.addComment(postId, content);
+
+        // 댓글 입력창 초기화
+        document.getElementById('commentContent').value = '';
+        document.getElementById('commentLength').textContent = '0';
+
+        // 댓글 목록 새로고침
+        setTimeout(() => {
+            this.showPostDetail(postId);
+        }, 100);
+    }
+
+    updatePostUI(postId) {
+        const post = this.posts.find(p => p.id === postId);
+        if (!post) return;
+
+        // 메인 커뮤니티 페이지의 게시글 카드 업데이트
+        const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+        if (postCard) {
+            const likeButton = postCard.querySelector('.like-button');
+            const likeCount = postCard.querySelector('.like-count');
+
+            if (likeButton && likeCount) {
+                likeButton.classList.toggle('text-red-500', post.isLiked);
+                likeButton.classList.toggle('text-gray-500', !post.isLiked);
+                likeCount.textContent = post.likes;
+            }
+        }
+    }
+
+    refreshCommunityUI() {
+        // 커뮤니티 섹션 새로고침
+        showSection('community');
+    }
+
+    formatTime(date) {
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return '방금 전';
+        if (minutes < 60) return `${minutes}분 전`;
+        if (hours < 24) return `${hours}시간 전`;
+        if (days < 7) return `${days}일 전`;
+
+        return date.toLocaleDateString('ko-KR');
+    }
+
+    saveCommunityData() {
+        const data = {
+            posts: this.posts,
+            userPosts: this.userPosts,
+            comments: Array.from(this.comments.entries()),
+            likes: Array.from(this.likes.entries())
+        };
+        localStorage.setItem('communityData', JSON.stringify(data));
+    }
+
+    loadCommunityData() {
+        const saved = localStorage.getItem('communityData');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                this.posts = data.posts || this.posts;
+                this.userPosts = data.userPosts || [];
+                this.comments = new Map(data.comments || []);
+                this.likes = new Map(data.likes || []);
+            } catch (e) {
+                console.error('Failed to load community data:', e);
+            }
+        }
+    }
+
+    showMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-in';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+}
+
 // 전역 인스턴스
 let languageManager;
+let tournamentManager;
+let eventManager;
+let communityManager;
 
 // 언어 관련 전역 함수
 function changeLanguage(languageCode) {
@@ -2758,10 +3945,48 @@ function toggleChatBot() {
     }
 }
 
-// DOM 로드 시 챗봇 초기화
+// 이벤트 관련 전역 함수
+function joinEvent(eventId) {
+    if (eventManager) {
+        eventManager.joinEvent(eventId);
+    } else {
+        alert('이벤트 매니저가 초기화되지 않았습니다.');
+    }
+}
+
+// 커뮤니티 관련 전역 함수
+function createPost() {
+    if (communityManager) {
+        communityManager.showCreatePostModal();
+    } else {
+        alert('커뮤니티 매니저가 초기화되지 않았습니다.');
+    }
+}
+
+function likePost(postId) {
+    if (communityManager) {
+        communityManager.likePost(postId);
+    } else {
+        alert('커뮤니티 매니저가 초기화되지 않았습니다.');
+    }
+}
+
+// DOM 로드 시 모든 시스템 초기화
 document.addEventListener('DOMContentLoaded', () => {
     // 다국어 시스템 초기화
     languageManager = new LanguageManager();
+
+    // 토너먼트 시스템 초기화
+    tournamentManager = new TournamentManager();
+    tournamentManager.loadProgress();
+
+    // 이벤트 시스템 초기화
+    eventManager = new EventManager();
+    eventManager.loadProgress();
+
+    // 커뮤니티 시스템 초기화
+    communityManager = new CommunityManager();
+    communityManager.loadCommunityData();
 
     // 챗봇 초기화
     chatBotManager = new ChatBotManager();

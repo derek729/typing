@@ -1618,6 +1618,9 @@
                                     <div class="progress-fill" style="width: 70%;"></div>
                                 </div>
                             </div>
+                            <button onclick="joinEvent('yearEndChallenge')" class="w-full bg-white text-purple-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                                <i class="fas fa-play mr-2"></i>이벤트 참여하기
+                            </button>
                         </div>
 
                         <div class="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-2xl p-6 text-white shadow-xl">
@@ -1628,18 +1631,19 @@
                                     <p class="font-bold">3일 8시간</p>
                                 </div>
                             </div>
-                            <h4 class="text-2xl font-bold mb-2">친구 초대 이벤트</h4>
-                            <p class="opacity-90 mb-4">친구를 초대하고 함께 보상을 받아보세요!</p>
+                            <h4 class="text-2xl font-bold mb-2">속도의 신 챌린지</h4>
+                            <p class="opacity-90 mb-4">속도의 한계를 넘어서세요!</p>
                             <div class="bg-white/20 rounded-xl p-4 mb-4">
-                                <p class="font-semibold mb-2">초대 보상:</p>
+                                <p class="font-semibold mb-2">챌린지 목표:</p>
                                 <ul class="text-sm space-y-1">
-                                    <li>• 1명 초대: 100 포인트</li>
-                                    <li>• 3명 초대: 500 포인트</li>
-                                    <li>• 5명 초대: 1,000 포인트 + 배지</li>
+                                    <li>• 40 WPM 달성</li>
+                                    <li>• 60 WPM 달성</li>
+                                    <li>• 80 WPM 달성</li>
+                                    <li>• 100 WPM 달성</li>
                                 </ul>
                             </div>
-                            <button class="w-full bg-white text-blue-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
-                                <i class="fas fa-share-alt mr-2"></i>친구 초대하기
+                            <button onclick="joinEvent('speedChallenge')" class="w-full bg-white text-blue-600 py-3 rounded-xl font-bold hover:bg-gray-100 transition">
+                                <i class="fas fa-play mr-2"></i>챌린지 참여하기
                             </button>
                         </div>
                     </div>
@@ -1703,12 +1707,12 @@
                         <div class="bg-white rounded-2xl shadow-lg p-6">
                             <div class="flex items-center justify-between mb-6">
                                 <h3 class="text-xl font-bold text-gray-800">자유 게시판</h3>
-                                <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
+                                <button onclick="createPost()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition">
                                     <i class="fas fa-pen mr-2"></i>글쓰기
                                 </button>
                             </div>
                             <div class="space-y-4">
-                                <div class="border rounded-xl p-4 hover:bg-gray-50 transition cursor-pointer">
+                                <div class="border rounded-xl p-4 hover:bg-gray-50 transition cursor-pointer" onclick="communityManager.showPostDetail('post_1')">
                                     <div class="flex items-start justify-between mb-2">
                                         <h4 class="font-semibold text-gray-800">타자 속도 150 WPM 돌파 기념!</h4>
                                         <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-semibold">인기</span>
@@ -1717,13 +1721,13 @@
                                     <div class="flex items-center justify-between text-sm text-gray-500">
                                         <div class="flex items-center space-x-4">
                                             <span><i class="fas fa-user mr-1"></i>SpeedKing</span>
-                                            <span><i class="fas fa-heart mr-1"></i>234</span>
+                                            <span class="like-button like-count"><i class="fas fa-heart mr-1"></i>234</span>
                                             <span><i class="fas fa-comment mr-1"></i>45</span>
                                         </div>
                                         <span>2시간 전</span>
                                     </div>
                                 </div>
-                                <div class="border rounded-xl p-4 hover:bg-gray-50 transition cursor-pointer">
+                                <div class="border rounded-xl p-4 hover:bg-gray-50 transition cursor-pointer" onclick="communityManager.showPostDetail('post_2')">
                                     <div class="flex items-start justify-between mb-2">
                                         <h4 class="font-semibold text-gray-800">정확도 향상 팁 공유합니다</h4>
                                         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-semibold">정보</span>
@@ -1732,7 +1736,7 @@
                                     <div class="flex items-center justify-between text-sm text-gray-500">
                                         <div class="flex items-center space-x-4">
                                             <span><i class="fas fa-user mr-1"></i>AccuracyPro</span>
-                                            <span><i class="fas fa-heart mr-1"></i>156</span>
+                                            <span class="like-button like-count"><i class="fas fa-heart mr-1"></i>156</span>
                                             <span><i class="fas fa-comment mr-1"></i>23</span>
                                         </div>
                                         <span>5시간 전</span>
