@@ -346,6 +346,17 @@ function setupEventListeners() {
             }
         });
     });
+
+    // 빠른 시작 버튼들
+    document.querySelectorAll('[onclick*="quickStart"]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const onclick = button.getAttribute('onclick');
+            const match = onclick.match(/quickStart\(['"]([^'"]+)['"])/);
+            if (match) {
+                quickStart(match[1]);
+            }
+        });
+    });
 }
 
 console.log('OpenTyping Pro Clean version ready!');
