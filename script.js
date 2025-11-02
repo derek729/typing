@@ -3255,7 +3255,147 @@ function showWelcomeMessage() {
     document.body.appendChild(welcomeMessage);
 }
 
-// 전역 함수 (HTML onclick 핸들러용)
+// 전역 함수 즉시 등록 (HTML onclick 핸들러용)
+(function() {
+    // 전역 함수들이 즉시 사용 가능하도록 등록
+    window.showSection = function(sectionName) {
+        console.log('OpenTyping Pro: 섹션 전환 요청 -', sectionName);
+        try {
+            if (window.app && typeof window.app.showSection === 'function') {
+                window.app.showSection(sectionName);
+                console.log('OpenTyping Pro: 섹션 전환 성공 -', sectionName);
+            } else {
+                console.error('OpenTyping Pro: 애플리케이션 또는 showSection 함수를 찾을 수 없음');
+                // 앱이 초기화되지 않은 경우 대체 처리
+                window.showSectionFallback(sectionName);
+            }
+        } catch (error) {
+            console.error('OpenTyping Pro: 섹션 전환 오류', error);
+            window.showSectionFallback(sectionName);
+        }
+    };
+
+    window.showSectionFallback = function(sectionName) {
+        console.log('OpenTyping Pro: 대체 섹션 전환 실행 -', sectionName);
+
+        // 모든 섹션 숨기기
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.add('hidden');
+        });
+
+        // 선택된 섹션 표시
+        const targetSection = document.getElementById(sectionName + 'Section');
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            console.log('OpenTyping Pro: 섹션 표시 성공 -', sectionName);
+        } else {
+            console.error('OpenTyping Pro: 섹션을 찾을 수 없음 -', sectionName + 'Section');
+        }
+    };
+
+    window.showPracticeCategory = function(category) {
+        console.log('OpenTyping Pro: 연습 카테고리 -', category);
+        if (window.app && typeof window.app.showPracticeCategory === 'function') {
+            window.app.showPracticeCategory(category);
+        } else {
+            console.log('OpenTyping Pro: 연습 카테고리 기능 준비중');
+        }
+    };
+
+    window.startPracticeSession = function() {
+        console.log('OpenTyping Pro: 연습 세션 시작');
+        if (window.app && typeof window.app.startPracticeSession === 'function') {
+            window.app.startPracticeSession();
+        } else {
+            console.log('OpenTyping Pro: 연습 세션 기능 준비중');
+        }
+    };
+
+    window.pausePracticeSession = function() {
+        console.log('OpenTyping Pro: 연습 세션 일시정지');
+        if (window.app && typeof window.app.pausePracticeSession === 'function') {
+            window.app.pausePracticeSession();
+        } else {
+            console.log('OpenTyping Pro: 연습 세션 기능 준비중');
+        }
+    };
+
+    window.restartPracticeSession = function() {
+        console.log('OpenTyping Pro: 연습 세션 재시작');
+        if (window.app && typeof window.app.restartPracticeSession === 'function') {
+            window.app.restartPracticeSession();
+        } else {
+            console.log('OpenTyping Pro: 연습 세션 기능 준비중');
+        }
+    };
+
+    window.quickStart = function(level) {
+        console.log('OpenTyping Pro: 빠른 시작 -', level);
+        if (window.app && typeof window.app.quickStart === 'function') {
+            window.app.quickStart(level);
+        } else {
+            window.showSection('practice');
+            console.log('OpenTyping Pro: 빠른 시작 기능 준비중');
+        }
+    };
+
+    window.joinTournament = function(tournamentId) {
+        console.log('OpenTyping Pro: 토너먼트 참가 -', tournamentId);
+        if (window.tournamentManager) {
+            window.tournamentManager.joinTournament(tournamentId);
+        } else {
+            alert('토너먼트 매니저가 초기화되지 않았습니다.');
+        }
+    };
+
+    window.toggleNotifications = function() {
+        console.log('OpenTyping Pro: 알림 토글');
+        const panel = document.getElementById('notificationPanel');
+        if (panel) {
+            panel.classList.toggle('hidden');
+        }
+    };
+
+    window.toggleTheme = function() {
+        console.log('OpenTyping Pro: 테마 토글');
+        document.body.classList.toggle('dark-mode');
+        const icon = document.getElementById('themeIcon');
+        if (icon) {
+            if (document.body.classList.contains('dark-mode')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+    };
+
+    window.showUserProfile = function() {
+        console.log('OpenTyping Pro: 사용자 프로필');
+        alert('사용자 프로필 기능은 준비중입니다.');
+    };
+
+    window.toggleMobileMenu = function() {
+        document.getElementById('mobileMenu')?.classList.toggle('hidden');
+    };
+
+    window.closeModal = function() {
+        if (window.app) {
+            window.app.closeModal();
+        }
+    };
+
+    window.nextLevel = function() {
+        if (window.app) {
+            window.app.nextLevel();
+        }
+    };
+
+    console.log('OpenTyping Pro: 전역 함수 등록 완료');
+})();
+
+// 전역 함수 (HTML onclick 핸들러용) - 레거시 호환성
 function showSection(sectionName) {
     console.log('OpenTyping Pro: 섹션 전환 요청 -', sectionName);
     try {
@@ -3855,16 +3995,16 @@ class ChatBotManager {
                     '🚀 ความลับของการเพิ่มความเร็ว:\n\n1️⃣ ฝึกทุกวัน 15 นาที\น2️⃣ ฝึกพิมพ์ไม่ดูคีย์บอร์ด\น3️⃣ สร้างความอึดด้วยข้อความยาวๆ\น4️⃣ ออกกำลังงานนิ้วมือแยกกัน\นตั้งเป้าหมายความเร็วและผมจะวางแผนโดยละเอียดให้!'
                 ],
                 ฝึก: [
-                '🎮 เริ่มฝึกไหม?\n\n📝 พื้นฐาน: ฝึก a s d f j k l;\น🔤 อักษร: พิมพ์คำภาษาอังกฤษ\น📞 ตัวเลข: ฝึกป้อนหมายเลขโทรศัพท์\น💻 การเขียนโปรแกรม: ฝึกพิมพ์โค้ด\นคุณต้องการฝึกประเภทไหน?',
-                '🎯 แผนการฝึกแบบส่วนตัว:\n\n🔥 5นาทีอุ่นเครื่อง: ฝึกท่าทางพื้นฐาน\น💪 15นาทีหลัก: ทำภารกิจเป้าหมาย\น🧊 5นาทีผ่อนคลาย: ทบทวนและจัดระเบียบ\นไปหน้าฝึกพิมพ์เลยไหม?'
+                    '🎮 เริ่มฝึกไหม?\n\n📝 พื้นฐาน: ฝึก a s d f j k l;\n🔤 อักษร: พิมพ์คำภาษาอังกฤษ\n📞 ตัวเลข: ฝึกป้อนหมายเลขโทรศัพท์\n💻 การเขียนโปรแกรม: ฝึกพิมพ์โค้ด\nคุณต้องการฝึกประเภทไหน?',
+                    '🎯 แผนการฝึกแบบส่วนตัว:\n\n🔥 5นาทีอุ่นเครื่อง: ฝึกท่าทางพื้นฐาน\n💪 15นาทีหลัก: ทำภารกิจเป้าหมาย\n🧊 5นาทีผ่อนคลาย: ทบทวนและจัดระเบียบ\nไปหน้าฝึกพิมพ์เลยไหม?'
+                ],
+                วิเคราะห์: [
+                    '📊 วิเคราะห์ทักษะปัจจุบัน?\n\n⌨️ WPM: ความเร็วพิมพ์ต่อนาทีปัจจุบัน\n🎯 ความแม่นยำ: อัตราข้อผิดพลาดและความแม่นยำ\n📈 แนวโน้ม: กราฟการเติบโตล่าสุด\n🏆 การจัดอันดับ: เปรียบเทียบกับผู้ใช้อื่น\nดูหน้าสถิติสำหรับการวิเคราะห์ละเอียด!',
+                    '📈 การวิเคราะห์ส่วนตัว:\n\n✅ จุดแข็ง: สิ่งที่คุณถนัด\n❌ จุดอ่อน: สิ่งที่ต้องปรับปรุง\n🎯 เป้าหมาย: เป้าหมายเดือนหน้า\n📅 แผน: แผนการเรียนรายสัปดาห์\นเริ่มการวิเคราะห์เลยไหม?'
             ],
-            วิเคราะห์: [
-                '📊 วิเคราะห์ทักษะปัจจุบัน?\n\n⌨️ WPM: ความเร็วพิมพ์ต่อนาทีปัจจุบัน\น🎯 ความแม่นยำ: อัตราข้อผิดพลาดและความแม่นยำ\น📈 แนวโน้ม: กราฟการเติบโตล่าสุด\น🏆 การจัดอันดับ: เปรียบเทียบกับผู้ใช้อื่น\นดูหน้าสถิติสำหรับการวิเคราะห์ละเอียด!',
-                '📈 การวิเคราะห์ส่วนตัว:\n\n✅ จุดแข็ง: สิ่งที่คุณถนัด\น❌ จุดอ่อน: สิ่งที่ต้องปรับปรุง\น🎯 เป้าหมาย: เป้าหมายเดือนหน้า\น📅 แผน: แผนการเรียนรายสัปดาห์\นเริ่มการวิเคราะห์เลยไหม?'
-            ],
-            แนะนำ: [
-                '🏆 คำแนะนำตามระดับปัจจุบัน:\n\n🌱 มือใหม่: ฝึกพื้นฐาน a s d f j k l;\น🌿 ระดับกลาง: พิมพ์ประโยคสั้นๆ\น🌳 ขั้นสูง: ข้อความยาวและคำศัพท์เฉพาะทาง\น🚀 ผู้เชี่ยวชาญ: ฝึกโค้ดและสัญลักษณ์\นบอกระดับปัจจุบันเพื่อรับคำแนะนำที่แม่นยำกว่า!',
-                '🎯 คอร์สแนะนำวันนี้:\n\n📚 [พื้นฐาน] การควบคุมตำแหน่งนิ้ว (10นาที)\น⚡ [ความเร็ว] ฝึกซ้ำเร็วๆ (15นาที)\น🎯 [ความแม่นยำ] พิมพ์เข้มข้น (10นาที)\น🔄 [ทบทวน] ทบทวนเนื้อหาทั้งหมด (5นาที)\นเริ่มเลยไหม?'
+                แนะนำ: [
+                    '🏆 คำแนะนำตามระดับปัจจุบัน:\n\n🌱 มือใหม่: ฝึกพื้นฐาน a s d f j k l;\n🌿 ระดับกลาง: พิมพ์ประโยคสั้นๆ\น🌳 ขั้นสูง: ข้อความยาวและคำศัพท์เฉพาะทาง\น🚀 ผู้เชี่ยวชาญ: ฝึกโค้ดและสัญลักษณ์\นบอกระดับปัจจุบันเพื่อรับคำแนะนำที่แม่นยำกว่า!',
+                    '🎯 คอร์สแนะนำวันนี้:\n\n📚 [พื้นฐาน] การควบคุมตำแหน่งนิ้ว (10นาที)\n⚡ [ความเร็ว] ฝึกซ้ำเร็วๆ (15นาที)\n🎯 [ความแม่นยำ] พิมพ์เข้มข้น (10นาที)\n🔄 [ทบทวน] ทบทวนเนื้อหาทั้งหมด (5นาที)\nเริ่มเลยไหม?'
             ]
         }
     }
