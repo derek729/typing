@@ -1700,6 +1700,823 @@ class AnalyticsManager {
 
         return recommendations;
     }
+
+    // 고급 분석 기능들
+
+    // 실시간 성능 모니터링
+    initializeRealTimeMonitoring() {
+        this.setupRealTimeCharts();
+        this.setupPerformanceAlerts();
+        this.setupGoalTracking();
+    }
+
+    // 실시간 차트 설정
+    setupRealTimeCharts() {
+        this.setupSpeedVariationChart();
+        this.setupAccuracyTrendChart();
+        this.setupKeyFrequencyChart();
+        this.setupSessionComparisonChart();
+    }
+
+    // 속도 변화 차트
+    setupSpeedVariationChart() {
+        const ctx = document.getElementById('speedVariationChart');
+        if (!ctx) return;
+
+        this.charts.speedVariation = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '실시간 WPM',
+                    data: [],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'WPM'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 0
+                }
+            }
+        });
+
+        // 실시간 데이터 업데이트 (1초마다)
+        setInterval(() => {
+            this.updateSpeedVariationChart();
+        }, 1000);
+    }
+
+    // 정확도 추세 차트
+    setupAccuracyTrendChart() {
+        const ctx = document.getElementById('accuracyTrendChart');
+        if (!ctx) return;
+
+        this.charts.accuracyTrend = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '정확도',
+                    data: [],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }, {
+                    label: '평균 정확도',
+                    data: [],
+                    borderColor: 'rgb(54, 162, 235)',
+                    borderDash: [5, 5],
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 70,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: '정확도 (%)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 키 빈도수 차트
+    setupKeyFrequencyChart() {
+        const ctx = document.getElementById('keyFrequencyChart');
+        if (!ctx) return;
+
+        this.charts.keyFrequency = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: '키 사용 빈도',
+                    data: [],
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '사용 횟수'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 세션 비교 차트
+    setupSessionComparisonChart() {
+        const ctx = document.getElementById('sessionComparisonChart');
+        if (!ctx) return;
+
+        const recentSessions = this.getRecentSessionsData();
+
+        this.charts.sessionComparison = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['속도', '정확도', '일관성', '지구력', '진행률'],
+                datasets: recentSessions.map((session, index) => ({
+                    label: `세션 ${index + 1}`,
+                    data: [
+                        session.wpm / 150 * 100, // 정규화된 WPM
+                        session.accuracy,
+                        session.consistency || 75,
+                        session.endurance || 80,
+                        session.progress || 90
+                    ],
+                    borderColor: this.getSessionColor(index),
+                    backgroundColor: this.getSessionColor(index, 0.2)
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+
+    // 세션 색상 가져오기
+    getSessionColor(index, alpha = 1) {
+        const colors = [
+            `rgba(255, 99, 132, ${alpha})`,
+            `rgba(54, 162, 235, ${alpha})`,
+            `rgba(255, 206, 86, ${alpha})`,
+            `rgba(75, 192, 192, ${alpha})`,
+            `rgba(153, 102, 255, ${alpha})`
+        ];
+        return colors[index % colors.length];
+    }
+
+    // 속도 변화 차트 업데이트
+    updateSpeedVariationChart() {
+        const chart = this.charts.speedVariation;
+        if (!chart || !app?.typingEngine) return;
+
+        const currentWPM = app.typingEngine.realtimeFeedback.wpm;
+        const currentTime = new Date().toLocaleTimeString();
+
+        // 데이터 추가 (최대 20개 포인트 유지)
+        chart.data.labels.push(currentTime);
+        chart.data.datasets[0].data.push(currentWPM);
+
+        if (chart.data.labels.length > 20) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+        }
+
+        chart.update('none');
+    }
+
+    // 성능 알림 설정
+    setupPerformanceAlerts() {
+        this.performanceThresholds = {
+            wpm: 60,
+            accuracy: 95,
+            consistency: 80,
+            streakDays: 7
+        };
+
+        this.checkPerformanceMilestones();
+        this.setupStreakTracking();
+    }
+
+    // 성능 이정표 확인
+    checkPerformanceMilestones() {
+        setInterval(() => {
+            const stats = AppState.currentUser.stats;
+            const alerts = [];
+
+            if (stats.avgWPM >= this.performanceThresholds.wpm && !this.achievements.wpmMilestone) {
+                alerts.push({
+                    type: 'achievement',
+                    title: '🚀 속도 이정표 달성!',
+                    message: `평균 ${stats.avgWPM} WPM 달성`,
+                    icon: 'speed'
+                });
+                this.achievements.wpmMilestone = true;
+            }
+
+            if (stats.avgAccuracy >= this.performanceThresholds.accuracy && !this.achievements.accuracyMilestone) {
+                alerts.push({
+                    type: 'achievement',
+                    title: '🎯 정확도 이정표 달성!',
+                    message: `평균 정확도 ${stats.avgAccuracy}% 달성`,
+                    icon: 'accuracy'
+                });
+                this.achievements.accuracyMilestone = true;
+            }
+
+            alerts.forEach(alert => this.showPerformanceAlert(alert));
+        }, 30000); // 30초마다 확인
+    }
+
+    // 성능 알림 표시
+    showPerformanceAlert(alert) {
+        const alertContainer = document.getElementById('performanceAlerts');
+        if (!alertContainer) return;
+
+        const alertElement = document.createElement('div');
+        alertElement.className = `performance-alert ${alert.type} animate-slide-in`;
+        alertElement.innerHTML = `
+            <div class="alert-icon">${alert.icon}</div>
+            <div class="alert-content">
+                <div class="alert-title">${alert.title}</div>
+                <div class="alert-message">${alert.message}</div>
+            </div>
+            <button class="alert-close" onclick="this.parentElement.remove()">×</button>
+        `;
+
+        alertContainer.appendChild(alertElement);
+
+        // 5초 후 자동 제거
+        setTimeout(() => {
+            if (alertElement.parentNode) {
+                alertElement.remove();
+            }
+        }, 5000);
+    }
+
+    // 목표 추적 설정
+    setupGoalTracking() {
+        this.goals = this.loadGoals();
+        this.updateGoalProgress();
+        this.setupGoalNotifications();
+    }
+
+    // 목표 로드
+    loadGoals() {
+        const stored = localStorage.getItem('typingGoals');
+        return stored ? JSON.parse(stored) : {
+            daily: {
+                practiceTime: 30, // 분
+                wpm: 70,
+                accuracy: 95
+            },
+            weekly: {
+                practiceTime: 150, // 분
+                wpm: 80,
+                sessions: 10
+            },
+            monthly: {
+                practiceTime: 600, // 분
+                wpm: 100,
+                achievements: 5
+            }
+        };
+    }
+
+    // 목표 진행률 업데이트
+    updateGoalProgress() {
+        const progress = this.calculateGoalProgress();
+        this.displayGoalProgress(progress);
+    }
+
+    // 목표 진행률 계산
+    calculateGoalProgress() {
+        const stats = AppState.currentUser.stats;
+        const today = new Date().toDateString();
+        const stored = localStorage.getItem('dailyProgress_' + today);
+        const dailyProgress = stored ? JSON.parse(stored) : { practiceTime: 0 };
+
+        return {
+            daily: {
+                practiceTime: (dailyProgress.practiceTime / this.goals.daily.practiceTime) * 100,
+                wpm: (stats.avgWPM / this.goals.daily.wpm) * 100,
+                accuracy: (stats.avgAccuracy / this.goals.daily.accuracy) * 100
+            },
+            weekly: {
+                practiceTime: (this.getWeeklyPracticeTime() / this.goals.weekly.practiceTime) * 100,
+                wpm: (stats.avgWPM / this.goals.weekly.wpm) * 100,
+                sessions: (this.getWeeklySessions() / this.goals.weekly.sessions) * 100
+            },
+            monthly: {
+                practiceTime: (this.getMonthlyPracticeTime() / this.goals.monthly.practiceTime) * 100,
+                wpm: (stats.avgWPM / this.goals.monthly.wpm) * 100,
+                achievements: (this.getAchievementsCount() / this.goals.monthly.achievements) * 100
+            }
+        };
+    }
+
+    // 목표 진행률 표시
+    displayGoalProgress(progress) {
+        const container = document.getElementById('goalProgress');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="goal-section">
+                <h3>일간 목표</h3>
+                ${this.createGoalProgressBars('daily', progress.daily)}
+            </div>
+            <div class="goal-section">
+                <h3>주간 목표</h3>
+                ${this.createGoalProgressBars('weekly', progress.weekly)}
+            </div>
+            <div class="goal-section">
+                <h3>월간 목표</h3>
+                ${this.createGoalProgressBars('monthly', progress.monthly)}
+            </div>
+        `;
+    }
+
+    // 목표 진행률 바 생성
+    createGoalProgressBars(period, progress) {
+        return Object.entries(progress).map(([key, value]) => {
+            const percentage = Math.min(value, 100);
+            const label = this.getGoalLabel(key);
+            const color = percentage >= 100 ? 'bg-green-500' : percentage >= 70 ? 'bg-yellow-500' : 'bg-red-500';
+
+            return `
+                <div class="goal-item">
+                    <span class="goal-label">${label}</span>
+                    <div class="goal-progress-bar">
+                        <div class="goal-progress-fill ${color}" style="width: ${percentage}%"></div>
+                    </div>
+                    <span class="goal-percentage">${Math.round(percentage)}%</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 목표 라벨 가져오기
+    getGoalLabel(key) {
+        const labels = {
+            practiceTime: '연습 시간',
+            wpm: '속도',
+            accuracy: '정확도',
+            sessions: '세션 수',
+            achievements: '업적 수'
+        };
+        return labels[key] || key;
+    }
+
+    // 주간 연습 시간 계산
+    getWeeklyPracticeTime() {
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+
+        let totalTime = 0;
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(weekStart);
+            date.setDate(date.getDate() + i);
+            const stored = localStorage.getItem('dailyProgress_' + date.toDateString());
+            if (stored) {
+                const progress = JSON.parse(stored);
+                totalTime += progress.practiceTime || 0;
+            }
+        }
+        return totalTime;
+    }
+
+    // 주간 세션 수 계산
+    getWeeklySessions() {
+        // 실제 구현에서는 세션 데이터를 기반으로 계산
+        return parseInt(localStorage.getItem('weeklySessions') || '3');
+    }
+
+    // 월간 연습 시간 계산
+    getMonthlyPracticeTime() {
+        const monthStart = new Date();
+        monthStart.setDate(1);
+
+        let totalTime = 0;
+        const today = new Date();
+        for (let d = new Date(monthStart); d <= today; d.setDate(d.getDate() + 1)) {
+            const stored = localStorage.getItem('dailyProgress_' + d.toDateString());
+            if (stored) {
+                const progress = JSON.parse(stored);
+                totalTime += progress.practiceTime || 0;
+            }
+        }
+        return totalTime;
+    }
+
+    // 업적 수 계산
+    getAchievementsCount() {
+        return AppState.currentUser.achievements?.length || 0;
+    }
+
+    // 최근 세션 데이터 가져오기
+    getRecentSessionsData() {
+        const stored = localStorage.getItem('recentSessions');
+        if (stored) {
+            return JSON.parse(stored).slice(-5); // 최근 5개 세션
+        }
+
+        // 기본 데이터
+        return [
+            { wpm: 65, accuracy: 92, consistency: 75, endurance: 80, progress: 85 },
+            { wpm: 72, accuracy: 94, consistency: 82, endurance: 85, progress: 88 },
+            { wpm: 68, accuracy: 91, consistency: 78, endurance: 82, progress: 86 },
+            { wpm: 75, accuracy: 96, consistency: 85, endurance: 88, progress: 92 },
+            { wpm: 80, accuracy: 95, consistency: 88, endurance: 90, progress: 95 }
+        ];
+    }
+
+    // 종합 성과 보고서 생성
+    generateComprehensiveReport() {
+        const report = {
+            summary: this.generatePerformanceSummary(),
+            trends: this.analyzeTrends(),
+            comparisons: this.generateComparisons(),
+            recommendations: this.generateAdvancedRecommendations(),
+            goals: this.analyzeGoalAchievement(),
+            insights: this.generateInsights()
+        };
+
+        this.displayComprehensiveReport(report);
+        return report;
+    }
+
+    // 성과 요약 생성
+    generatePerformanceSummary() {
+        const stats = AppState.currentUser.stats;
+        const recentData = this.getRecentSessionsData();
+        const avgRecentWPM = recentData.reduce((sum, s) => sum + s.wpm, 0) / recentData.length;
+        const avgRecentAccuracy = recentData.reduce((sum, s) => sum + s.accuracy, 0) / recentData.length;
+
+        return {
+            currentLevel: this.calculateUserLevel(),
+            overallWPM: stats.avgWPM,
+            recentWPM: Math.round(avgRecentWPM),
+            overallAccuracy: stats.avgAccuracy,
+            recentAccuracy: Math.round(avgRecentAccuracy),
+            totalPracticeTime: stats.totalTime,
+            improvementRate: this.calculateImprovementRate(),
+            strengths: this.identifyStrengths(),
+            weaknesses: this.identifyWeaknesses()
+        };
+    }
+
+    // 사용자 레벨 계산
+    calculateUserLevel() {
+        const wpm = AppState.currentUser.stats.avgWPM;
+        const accuracy = AppState.currentUser.stats.avgAccuracy;
+
+        if (wpm >= 120 && accuracy >= 98) return '전문가';
+        if (wpm >= 90 && accuracy >= 95) return '고급';
+        if (wpm >= 60 && accuracy >= 90) return '중급';
+        if (wpm >= 30 && accuracy >= 80) return '초급';
+        return '입문';
+    }
+
+    // 향상률 계산
+    calculateImprovementRate() {
+        const lastMonth = this.getLastMonthData();
+        const thisMonth = this.getThisMonthData();
+
+        if (!lastMonth.wpm) return 0;
+        return ((thisMonth.wpm - lastMonth.wpm) / lastMonth.wpm * 100).toFixed(1);
+    }
+
+    // 강점 식별
+    identifyStrengths() {
+        const strengths = [];
+        const stats = AppState.currentUser.stats;
+
+        if (stats.avgAccuracy >= 95) strengths.push('높은 정확성');
+        if (stats.avgWPM >= 80) strengths.push('빠른 타이핑 속도');
+        if (stats.practiceStreak >= 7) strengths.push('꾸준한 연습');
+        if (stats.maxWPM >= stats.avgWPM * 1.5) strengths.push('높은 잠재력');
+
+        return strengths;
+    }
+
+    // 약점 식별
+    identifyWeaknesses() {
+        const weaknesses = [];
+        const stats = AppState.currentUser.stats;
+
+        if (stats.avgAccuracy < 90) weaknesses.push('정확성 향상 필요');
+        if (stats.avgWPM < 40) weaknesses.push('기본 속도 향상 필요');
+        if (stats.practiceStreak < 3) weaknesses.push('규칙적인 연습 부족');
+        if (stats.maxWPM < stats.avgWPM * 1.2) weaknesses.push('속도 변동성 부족');
+
+        return weaknesses;
+    }
+
+    // 트렌드 분석
+    analyzeTrends() {
+        return {
+            wpmTrend: this.calculateWPMTrend(),
+            accuracyTrend: this.calculateAccuracyTrend(),
+            practiceFrequency: this.analyzePracticeFrequency(),
+            bestPerformanceTimes: this.identifyBestPerformanceTimes(),
+            improvementAreas: this.identifyImprovementAreas()
+        };
+    }
+
+    // WPM 트렌드 계산
+    calculateWPMTrend() {
+        const recentData = this.getRecentSessionsData();
+        if (recentData.length < 2) return 'stable';
+
+        const recent = recentData.slice(-3);
+        const older = recentData.slice(-6, -3);
+
+        const recentAvg = recent.reduce((sum, s) => sum + s.wpm, 0) / recent.length;
+        const olderAvg = older.length > 0 ? older.reduce((sum, s) => sum + s.wpm, 0) / older.length : recentAvg;
+
+        if (recentAvg > olderAvg * 1.1) return 'improving';
+        if (recentAvg < olderAvg * 0.9) return 'declining';
+        return 'stable';
+    }
+
+    // 정확도 트렌드 계산
+    calculateAccuracyTrend() {
+        const recentData = this.getRecentSessionsData();
+        if (recentData.length < 2) return 'stable';
+
+        const recentAvg = recentData.slice(-3).reduce((sum, s) => sum + s.accuracy, 0) / 3;
+        const overallAvg = recentData.reduce((sum, s) => sum + s.accuracy, 0) / recentData.length;
+
+        if (recentAvg > overallAvg + 2) return 'improving';
+        if (recentAvg < overallAvg - 2) return 'declining';
+        return 'stable';
+    }
+
+    // 연습 빈도 분석
+    analyzePracticeFrequency() {
+        const dailyData = this.getDailyPracticeData();
+        const activeDays = dailyData.filter(day => day.practiceTime > 0).length;
+        const consistency = (activeDays / dailyData.length) * 100;
+
+        if (consistency >= 80) return 'high';
+        if (consistency >= 50) return 'medium';
+        return 'low';
+    }
+
+    // 최고 성과 시간대 식별
+    identifyBestPerformanceTimes() {
+        // 실제 구현에서는 시간대별 성과 데이터 분석
+        return ['오전 9-11시', '오후 2-4시'];
+    }
+
+    // 개선 영역 식별
+    identifyImprovementAreas() {
+        const areas = [];
+        const recentData = this.getRecentSessionsData();
+
+        const avgWPM = recentData.reduce((sum, s) => sum + s.wpm, 0) / recentData.length;
+        const avgAccuracy = recentData.reduce((sum, s) => sum + s.accuracy, 0) / recentData.length;
+
+        if (avgWPM < 60) areas.push('기본 속도 향상');
+        if (avgAccuracy < 95) areas.push('정확성 개선');
+        if (recentData.some(s => s.consistency < 80)) areas.push('타이핑 일관성');
+
+        return areas;
+    }
+
+    // 종합 보고서 표시
+    displayComprehensiveReport(report) {
+        const reportContainer = document.getElementById('comprehensiveReport');
+        if (!reportContainer) return;
+
+        reportContainer.innerHTML = `
+            <div class="report-header">
+                <h2>종합 성과 보고서</h2>
+                <p>생성일: ${new Date().toLocaleDateString()}</p>
+            </div>
+
+            <div class="report-section">
+                <h3>성과 요약</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="label">현재 레벨</span>
+                        <span class="value">${report.summary.currentLevel}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">평균 WPM</span>
+                        <span class="value">${report.summary.overallWPM}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">정확도</span>
+                        <span class="value">${report.summary.overallAccuracy}%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="label">향상률</span>
+                        <span class="value">${report.summary.improvementRate}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>강점</h3>
+                <ul class="strengths-list">
+                    ${report.summary.strengths.map(strength => `<li>${strength}</li>`).join('')}
+                </ul>
+            </div>
+
+            <div class="report-section">
+                <h3>개선 영역</h3>
+                <ul class="weaknesses-list">
+                    ${report.summary.weaknesses.map(weakness => `<li>${weakness}</li>`).join('')}
+                </ul>
+            </div>
+
+            <div class="report-section">
+                <h3>추천 연습</h3>
+                <div class="recommendations">
+                    ${report.recommendations.map(rec => `
+                        <div class="recommendation-item">
+                            <h4>${rec.title}</h4>
+                            <p>${rec.description}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    // 고급 추천 생성
+    generateAdvancedRecommendations() {
+        const summary = this.generatePerformanceSummary();
+        const trends = this.analyzeTrends();
+        const recommendations = [];
+
+        // 속도 기반 추천
+        if (summary.overallWPM < 40) {
+            recommendations.push({
+                title: '기초 속도 훈련',
+                description: '홈 포지션 연습과 기본 문자 반복 훈련에 집중하세요.',
+                priority: 'high'
+            });
+        } else if (summary.overallWPM > 80) {
+            recommendations.push({
+                title: '고급 기술 도전',
+                description: '복잡한 단어와 문장, 프로그래밍 코드 연습을 도전해보세요.',
+                priority: 'medium'
+            });
+        }
+
+        // 트렌드 기반 추천
+        if (trends.wpmTrend === 'declining') {
+            recommendations.push({
+                title: '속도 유지 훈련',
+                description: '일관된 속도를 유지하는 연습이 필요합니다.',
+                priority: 'high'
+            });
+        }
+
+        // 빈도 기반 추천
+        if (trends.practiceFrequency === 'low') {
+            recommendations.push({
+                title: '규칙적 연습 습관',
+                description: '매일 짧게라도 꾸준히 연습하는 습관을 만들어보세요.',
+                priority: 'high'
+            });
+        }
+
+        return recommendations;
+    }
+
+    // 인사이트 생성
+    generateInsights() {
+        return {
+            bestTimeOfDay: '오후 2-4시',
+            optimalSessionLength: '25-30분',
+            recommendedBreakInterval: '5분마다 짧은 휴식',
+            learningStyle: '시각적 학습 유형',
+            motivationFactors: ['성취감', '경쟁', '진행률 시각화'],
+            potentialLimitations: ['연습 시간 부족', '손가락 위치 미숙']
+        };
+    }
+
+    // 업적 시스템 초기화
+    initializeAchievements() {
+        this.achievements = this.loadAchievements();
+        this.checkAchievements();
+        this.displayAchievements();
+    }
+
+    // 업적 로드
+    loadAchievements() {
+        const stored = localStorage.getItem('typingAchievements');
+        return stored ? JSON.parse(stored) : {};
+    }
+
+    // 업적 확인
+    checkAchievements() {
+        const stats = AppState.currentUser.stats;
+
+        // 속도 관련 업적
+        if (stats.maxWPM >= 100 && !this.achievements.speed100) {
+            this.unlockAchievement('speed100', '속도의 전문가', '100 WPM 달성');
+        }
+
+        // 정확도 관련 업적
+        if (stats.avgAccuracy >= 98 && !this.achievements.accuracy98) {
+            this.unlockAchievement('accuracy98', '정확성의 달인', '98% 정확도 달성');
+        }
+
+        // 연습 일수 관련 업적
+        if (stats.practiceStreak >= 30 && !this.achievements.streak30) {
+            this.unlockAchievement('streak30', '꾸준함의 마스터', '30일 연속 출석');
+        }
+    }
+
+    // 업적 해금
+    unlockAchievement(id, title, description) {
+        this.achievements[id] = { unlocked: true, title, description, date: new Date().toISOString() };
+        localStorage.setItem('typingAchievements', JSON.stringify(this.achievements));
+
+        this.showAchievementNotification(title, description);
+        this.displayAchievements();
+    }
+
+    // 업적 알림 표시
+    showAchievementNotification(title, description) {
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification animate-slide-in';
+        notification.innerHTML = `
+            <div class="achievement-icon">🏆</div>
+            <div class="achievement-content">
+                <div class="achievement-title">${title}</div>
+                <div class="achievement-description">${description}</div>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    // 업적 표시
+    displayAchievements() {
+        const container = document.getElementById('achievementsList');
+        if (!container) return;
+
+        const allAchievements = this.getAllAchievements();
+
+        container.innerHTML = allAchievements.map(achievement => {
+            const unlocked = this.achievements[achievement.id];
+            return `
+                <div class="achievement-card ${unlocked ? 'unlocked' : 'locked'}">
+                    <div class="achievement-icon">${achievement.icon}</div>
+                    <div class="achievement-info">
+                        <h4>${achievement.title}</h4>
+                        <p>${achievement.description}</p>
+                        ${unlocked ? `<small>달성일: ${new Date(unlocked.date).toLocaleDateString()}</small>` : '<small>잠김</small>'}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // 모든 업적 정보
+    getAllAchievements() {
+        return [
+            { id: 'speed50', title: '속도의 시작', description: '50 WPM 달성', icon: '⚡' },
+            { id: 'speed75', title: '중급 타이피스트', description: '75 WPM 달성', icon: '🚀' },
+            { id: 'speed100', title: '속도의 전문가', description: '100 WPM 달성', icon: '💫' },
+            { id: 'accuracy90', title: '정확한 타이핑', description: '90% 정확도 달성', icon: '🎯' },
+            { id: 'accuracy95', title: '정확성의 달인', description: '95% 정확도 달성', icon: '🏹' },
+            { id: 'accuracy98', title: '완벽주의자', description: '98% 정확도 달성', icon: '💎' },
+            { id: 'streak7', title: '일주일 꾸준함', description: '7일 연속 출석', icon: '📅' },
+            { id: 'streak30', title: '꾸준함의 마스터', description: '30일 연속 출석', icon: '🏆' },
+            { id: 'time10', title: '꾸준한 수련생', description: '총 10시간 연습', icon: '⏰' },
+            { id: 'time50', title: '타자 애호가', description: '총 50시간 연습', icon: '⌚' }
+        ];
+    }
 }
 
 // 메인 애플리케이션 클래스
