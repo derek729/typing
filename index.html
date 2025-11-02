@@ -800,6 +800,22 @@
                 </nav>
 
                 <div class="flex items-center space-x-4">
+                    <!-- 언어 선택기 -->
+                    <div class="relative">
+                        <button id="languageSelector" class="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                            <i class="fas fa-globe text-gray-600"></i>
+                            <span id="currentLanguage" class="text-sm font-medium text-gray-700">한국어</span>
+                            <i class="fas fa-chevron-down text-xs text-gray-600"></i>
+                        </button>
+
+                        <!-- 언어 드롭다운 -->
+                        <div id="languageDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+                            <div class="max-h-96 overflow-y-auto p-2">
+                                <!-- 언어 목록이 JavaScript로 동적으로 생성됩니다 -->
+                            </div>
+                        </div>
+                    </div>
+
                     <button onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-indigo-600 transition">
                         <i class="fas fa-bell text-xl"></i>
                         <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>

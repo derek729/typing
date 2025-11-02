@@ -1,13 +1,47 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import AppNavigator from './src/navigation/AppNavigator';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './navigation/AppNavigator';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { View } from 'react-native';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
 
-const App = () => {
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
+const RootApp = () => {
+  const [fontsLoaded] = useFonts({
+    'NanumBarunGothic': require('../assets/fonts/NanumBarunGothic.ttf'),
+  });
+
+  const { theme } = useTheme();
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null; // Or a custom loading component
+  }
+
   return (
-    <SafeAreaProvider>
-      <AppNavigator />
+    <SafeAreaProvider onLayout={onLayoutRootView}>
+      <StatusBar style={theme === 'light' ? 'dark' : 'light'} />
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 };
 
-export default App; 
+const App = () => (
+  <ThemeProvider>
+    <RootApp />
+  </ThemeProvider>
+);
+
+export default App;
