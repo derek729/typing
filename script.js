@@ -59,68 +59,372 @@ const AppState = {
     notifications: []
 };
 
-// 확장된 타자 연습 텍스트 데이터
+// 확장된 다국어 타자 연습 텍스트 데이터
 const PRACTICE_TEXTS = {
-    basic: [
-        'a s d f j k l',
-        'f j d k s l a',
-        'ask fall salad salad',
-        'lad asks sad falls',
-        'a lad asks a dad',
-        'a sad dad falls',
-        'all dads ask lads',
-        'sad falls ask all'
-    ],
-    speed: [
-        'the quick brown fox jumps over the lazy dog',
-        'pack my box with five dozen liquor jugs',
-        'the five boxing wizards jump quickly',
-        'sphinx of black quartz judge my vow',
-        'how vexingly quick daft zebras jump',
-        'two driven jocks help fax my big quiz',
-        'five quacking zephyrs jolt my wax bed',
-        'the jay, pig, fox, zebra and my wolves quack'
-    ],
-    accuracy: [
-        'Practice makes perfect when typing accurately',
-        'Slow and steady wins the race in typing',
-        'Focus on accuracy first, then speed will follow',
-        'Every mistake is a learning opportunity',
-        'Consistent practice builds muscle memory',
-        'Take breaks to maintain focus and accuracy',
-        'Proper posture prevents typing injuries',
-        'Relaxed hands type better than tense ones'
-    ],
-    numbers: [
-        '123 456 789 0',
-        '987 654 321 0',
-        '2024 is the current year',
-        'Phone: 010-1234-5678',
-        'Price: $99.99',
-        'Temperature: 23.5°C',
-        'Time: 14:30:45',
-        'Date: 2024-12-25'
-    ],
-    symbols: [
-        '!@#$%^&*()',
-        '{}[]|\\:;\"\'<>?,./',
-        'JavaScript uses { } for blocks',
-        'Python uses : and indentation',
-        'HTML uses < > for tags',
-        'CSS uses { } for styles',
-        'Math: 2 + 2 = 4, 3 * 3 = 9',
-        'URL: https://example.com/page?param=value'
-    ],
-    programming: [
-        'function calculateSum(a, b) { return a + b; }',
-        'const array = [1, 2, 3, 4, 5];',
-        'if (condition) { doSomething(); }',
-        'for (let i = 0; i < 10; i++) { console.log(i); }',
-        'class Person { constructor(name) { this.name = name; } }',
-        'import React from \'react\';',
-        'const result = await fetchData();',
-        'try { riskyOperation(); } catch (error) { handleError(error); }'
-    ]
+    basic: {
+        ko: [
+            '가 나 다 라 마 바 사',
+            '마 사 다 라 나 가',
+            '가을 나라 다라 발발',
+            '나랄 발발 다나 가나',
+            '가나 발 다 발 나랄',
+            '가발 발나 발 다나 발',
+            '나랄 발 나 발 다라 발'
+        ],
+        en: [
+            'a s d f j k l',
+            'f j d k s l a',
+            'ask fall salad salad',
+            'lad asks sad falls',
+            'a lad asks a dad',
+            'a sad dad falls',
+            'all dads ask lads',
+            'sad falls ask all'
+        ],
+        ja: [
+            'あ さ し す せ そ',
+            'せ そ し す さ あ',
+            'あさ し す そ さ あ',
+            'さそ し あ す あ さ',
+            'あし さ あ そ し あ',
+            'あそ し さ あ そ さ',
+            'さあ し あ そ し さ'
+        ],
+        zh: [
+            '的 一 人 我 们 是',
+            '们 是 人 我 一 的',
+            '我 们 是 一 个 人',
+            '一 个 人 们 我 是',
+            '人 们 是 我 们',
+            '我 是 人 们 的',
+            '的 人 们 我 是'
+        ],
+        vi: [
+            'một hai ba bốn năm sáu',
+            'sáu năm bốn ba hai một',
+            'một người hai ba bốn năm',
+            'năm bốn ba hai một người',
+            'một ba hai bốn năm sáu',
+            'sáu năm bốn ba hai một',
+            'một hai ba bốn năm sáu'
+        ],
+        th: [
+            'ก ข ค ง จ ฉ ช',
+            'ฉ ช จ ง ค ข ก',
+            'กะ ขะ คะ งะ จะ ฉะ',
+            'จะ ฉะ งะ คะ ขะ กะ',
+            'กะ คะ งะ จะ ฉะ ชะ',
+            'ฉะ ชะ จะ กะ ขะ งะ',
+            'กะ ชะ จะ ฉะ ชะ'
+        ]
+    },
+    speed: {
+        ko: [
+            '빠른 갈색 여우가 나른 게으른 개를 뛰어넘었다',
+            '오늘 저녁 떡이는 구름이 하늘을 날아다',
+            '산토일 오후 비가 오기 전에 산에 올랐다',
+            '가을의 단풍잎이 붉은 나뭇에 떨어졌다',
+            '빨리 빠리 달리는 다람쥐가 하늘을 날았다',
+            '오늘 밤에 별이 많이 떨어졌다',
+            '겨울이 되면 꽃이 많이 핀다',
+            '여름 방학이 좋아서 친구들이 웃는다'
+        ],
+        en: [
+            'the quick brown fox jumps over the lazy dog',
+            'pack my box with five dozen liquor jugs',
+            'the five boxing wizards jump quickly',
+            'sphinx of black quartz judge my vow',
+            'how vexingly quick daft zebras jump',
+            'two driven jocks help fax my big quiz',
+            'five quacking zephyrs jolt my wax bed',
+            'the jay, pig, fox, zebra and my wolves quack'
+        ],
+        ja: [
+            '素早く茶色のキツネが眠い犬を飛び越えた',
+            '青い空の下で小鳥が歌を歌っている',
+            '春の桜の木の下で子供たちが遊んでいる',
+            '秋の夜空にきれいな星が輝いている',
+            '冬の朝に雪が静かに降り積もる',
+            '夏の海辺で波が静かに打ち寄せる',
+            '山の頂上から見る景色は息をのむ'
+        ],
+        zh: [
+            '快速的棕色狐狸跳过懒惰的狗',
+            '五只打拳的巫师快速跳起来',
+            '黑石英狮身法官发誓我的誓言',
+            '多么令人恼火快速愚蠢的斑马跳',
+            '两个被驱动的选手帮助传真我的大测验',
+            '五只嘎嘎作响的西风震动我的蜡床',
+            '蓝鸟、猪、狐狸、斑马和我的狼嘎嘎叫'
+        ],
+        vi: [
+            'cáo nâu nâu chó nhàm chó chậm',
+            'gói năm lon sáu hộp hộp vào hộp',
+            'mười chàng nhanh nhảy qua con chó lười chậm',
+            'chiếc hộp năm lon chứa một hộp rượu',
+            'năm nhà wizard quyền nhanh nhảy',
+            'nhân sư đen ngọc của tôi phán lời',
+            'năm con vịt quạ giật nệm giường sáp của tôi'
+        ],
+        th: [
+            'สุนัทกรมดำสีกระโดดกระสุนัทช้าง',
+            'หกด้านลิกเกอร์แกะมิเรือนอะไท',
+            'สองสิงหกมดดวอดออกาภาย',
+            'ฟ้าคื้นคื้นในวันอาทิตย์',
+            'หิมะเห็นความเจ็จในดว่าน',
+            'ฝนอร่อลดแบ่งบนกะพิมพ์',
+            'สิบสิบเปลือนมาดมหาว',
+            'หกดวามดัวมหลวยทานทาง'
+        ]
+    },
+    accuracy: {
+        ko: [
+            '연습은 완벽함을 만들 때 정확하게 타이핑한다',
+            '느리고 꾸준함이 타이핑 경주에서 이긴다',
+            '정확도를 먼저 집중하면 속도는 자연스럽게 따라온다',
+            '모든 실수는 학습 기회가 된다',
+            '일관된 연습은 근육 기억을 만든다',
+            '휴식을 취해 집중도와 정확도를 유지하라',
+            '올바른 자세는 타이핑 부상을 예방한다',
+            '편안한 손이 긴장한 손보다 더 잘 타이핑한다'
+        ],
+        en: [
+            'Practice makes perfect when typing accurately',
+            'Slow and steady wins the race in typing',
+            'Focus on accuracy first, then speed will follow',
+            'Every mistake is a learning opportunity',
+            'Consistent practice builds muscle memory',
+            'Take breaks to maintain focus and accuracy',
+            'Proper posture prevents typing injuries',
+            'Relaxed hands type better than tense ones'
+        ],
+        ja: [
+            '正確な練習は完璧を作ります',
+            'ゆっくりと着実に練習することが速さの競争に勝ちます',
+            'まず正確さに集中すれば、速さは自然とついてきます',
+            'すべての間違いは学習の機会です',
+            '一貫した練習は筋肉記憶を構築します',
+            '休憩を取って集中力と正確さを維持してください',
+            '正しい姿勢はタイピング怪我を防ぎます',
+            'リラックスした手は緊張した手よりよくタイピングします'
+        ],
+        zh: [
+            '准确的练习创造完美',
+            '缓慢而稳定在打字比赛中获胜',
+            '首先专注于准确性，速度会自然跟随',
+            '每个错误都是学习的机会',
+            '一致的练习建立肌肉记忆',
+            '休息以保持专注和准确性',
+            '正确的姿势防止打字伤害',
+            '放松的手比紧张的手打字更好'
+        ],
+        vi: [
+            'Luyện tập chính xác tạo ra sự hoàn hảo',
+            'Chậm và ổn định giành cuộc đua trong cuộc đua gõ',
+            'Tập trung vào sự chính xác trước, tốc độ sẽ tự nhiên theo sau',
+            'Mỗi sai lầm là cơ hội học tập',
+            'Luyện tập nhất quán xây dựng trí nhớ cơ bắp',
+            'Nghỉ ngơi để duy trì sự tập trung và chính xác',
+            'Tư thế đúng ngăn ngừa chấn thương gõ phím',
+            'Bàn tay thư giãn gõ tốt hơn bàn tay căng thẳng'
+        ],
+        th: [
+            'การฝึกแม่นทำให้สมบูรณ',
+            'ช้ายและมั่นค่อยในการแข่งพิมพ์ด์',
+            'มุ่งเน้นที่ความแม่นคือความเร็วจจะเป็นไปตามั',
+            'ทุกๆความผิดพลาดคือโอกาสการเรียนรู้',
+            'การฝึกอย่างต่อเนื่องสร้างความจำจำ',
+            'พักผ่อนเพื่อรักษาสมานธิและความแม่น',
+            'ท่าทาที่ถูกต้องป้องกันการบาดเจ็บ',
+            'มือที่ผ่อนสบายกว่ามือที่ตึงเครียง'
+        ]
+    },
+    numbers: {
+        ko: [
+            '123 456 789 0',
+            '987 654 321 0',
+            '2024년은 올해 연도입니다',
+            '전화번호: 010-1234-5678',
+            '가격: ₩99,999',
+            '온도: 23.5°C',
+            '시간: 14시 30분 45초',
+            '날짜: 2024년 12월 25일'
+        ],
+        en: [
+            '123 456 789 0',
+            '987 654 321 0',
+            '2024 is the current year',
+            'Phone: 010-1234-5678',
+            'Price: $99.99',
+            'Temperature: 23.5°C',
+            'Time: 14:30:45',
+            'Date: 2024-12-25'
+        ],
+        ja: [
+            '123 456 789 0',
+            '987 654 321 0',
+            '2024年は今年の年です',
+            '電話番号: 090-1234-5678',
+            '価格: ¥9,999',
+            '温度: 23.5°C',
+            '時間: 14時30分45秒',
+            '日付: 2024年12月25日'
+        ],
+        zh: [
+            '123 456 789 0',
+            '987 654 321 0',
+            '2024年是今年',
+            '电话: 010-1234-5678',
+            '价格: ¥99.99',
+            '温度: 23.5°C',
+            '时间: 14:30:45',
+            '日期: 2024-12-25'
+        ],
+        vi: [
+            '123 456 789 0',
+            '987 654 321 0',
+            'Năm 2024 là năm hiện tại',
+            'Điện thoại: 090-1234-5678',
+            'Giá: 99.999đ',
+            'Nhiệt độ: 23.5°C',
+            'Thời gian: 14:30:45',
+            'Ngày: 25/12/2024'
+        ],
+        th: [
+            '123 456 789 0',
+            '987 654 321 0',
+            'ปี 2024 เป็นปีปัจจุบัน',
+            'โทรศัพท์: 090-1234-5678',
+            'ราคา: ฿9,999',
+            'อุณหภูมิ: 23.5°C',
+            'เวลา: 14:30:45',
+            'วันที่: 25/12/2024'
+        ]
+    },
+    symbols: {
+        ko: [
+            '!@#$%^&*()',
+            '{}[]|\\:;\"\'<>?,./',
+            'JavaScript는 { } 블록을 사용합니다',
+            'Python은 : 와 들여쓰기를 사용합니다',
+            'HTML은 < > 태그를 사용합니다',
+            'CSS는 { } 스타일을 사용합니다',
+            '수학: 2 + 2 = 4, 3 * 3 = 9',
+            'URL: https://example.com/page?param=value'
+        ],
+        en: [
+            '!@#$%^&*()',
+            '{}[]|\\:;\"\'<>?,./',
+            'JavaScript uses { } for blocks',
+            'Python uses : and indentation',
+            'HTML uses < > for tags',
+            'CSS uses { } for styles',
+            'Math: 2 + 2 = 4, 3 * 3 = 9',
+            'URL: https://example.com/page?param=value'
+        ],
+        ja: [
+            '!@#$%^&*()',
+            '{}[]|\\:;\"\'<>?,./',
+            'JavaScriptは { } ブロックを使用します',
+            'Pythonは : とインデントを使用します',
+            'HTMLは < > タグを使用します',
+            'CSSは { } スタイルを使用します',
+            '数学: 2 + 2 = 4, 3 * 3 = 9',
+            'URL: https://example.com/page?param=value'
+        ],
+        zh: [
+            '!@#$%^&*()',
+            '{}[]|\\:;\"\'<>?,./',
+            'JavaScript使用 { } 作为代码块',
+            'Python使用 : 和缩进',
+            'HTML使用 < > 作为标签',
+            'CSS使用 { } 作为样式',
+            '数学: 2 + 2 = 4, 3 * 3 = 9',
+            '网址: https://example.com/page?param=value'
+        ],
+        vi: [
+            '!@#$%^&*()',
+            '{}[]|\\:;\"\'<>?,./',
+            'JavaScript sử dụng { } cho khối',
+            'Python sử dụng : và thụt lề',
+            'HTML sử dụng < > cho thẻ',
+            'CSS sử dụng { } cho kiểu',
+            'Toán: 2 + 2 = 4, 3 * 3 = 9',
+            'URL: https://example.com/page?param=value'
+        ],
+        th: [
+            '!@#$%^&*()',
+            '{}[]|\\:;\"\'<>?,./',
+            'JavaScript ใช้ { } สำหรับบล็อก',
+            'Python ใช้ : และการเยืนย่อน',
+            'HTML ใช้ < > สำหรับแท็ก',
+            'CSS ใช้ { } สำหรับสไตล์',
+            'คณิตศาสตร์: 2 + 2 = 4, 3 * 3 = 9',
+            'URL: https://example.com/page?param=value'
+        ]
+    },
+    programming: {
+        ko: [
+            'function calculateSum(a, b) { return a + b; }',
+            'const array = [1, 2, 3, 4, 5];',
+            'if (condition) { doSomething(); }',
+            'for (let i = 0; i < 10; i++) { console.log(i); }',
+            'class Person { constructor(name) { this.name = name; } }',
+            'import React from \'react\';',
+            'const result = await fetchData();',
+            'try { riskyOperation(); } catch (error) { handleError(error); }'
+        ],
+        en: [
+            'function calculateSum(a, b) { return a + b; }',
+            'const array = [1, 2, 3, 4, 5];',
+            'if (condition) { doSomething(); }',
+            'for (let i = 0; i < 10; i++) { console.log(i); }',
+            'class Person { constructor(name) { this.name = name; } }',
+            'import React from \'react\';',
+            'const result = await fetchData();',
+            'try { riskyOperation(); } catch (error) { handleError(error); }'
+        ],
+        ja: [
+            'function calculateSum(a, b) { return a + b; }',
+            'const array = [1, 2, 3, 4, 5];',
+            'if (condition) { doSomething(); }',
+            'for (let i = 0; i < 10; i++) { console.log(i); }',
+            'class Person { constructor(name) { this.name = name; } }',
+            'import React from \'react\';',
+            'const result = await fetchData();',
+            'try { riskyOperation(); } catch (error) { handleError(error); }'
+        ],
+        zh: [
+            'function calculateSum(a, b) { return a + b; }',
+            'const array = [1, 2, 3, 4, 5];',
+            'if (condition) { doSomething(); }',
+            'for (let i = 0; i < 10; i++) { console.log(i); }',
+            'class Person { constructor(name) { this.name = name; } }',
+            'import React from \'react\';',
+            'const result = await fetchData();',
+            'try { riskyOperation(); } catch (error) { handleError(error); }'
+        ],
+        vi: [
+            'function calculateSum(a, b) { return a + b; }',
+            'const array = [1, 2, 3, 4, 5];',
+            'if (condition) { doSomething(); }',
+            'for (let i = 0; i < 10; i++) { console.log(i); }',
+            'class Person { constructor(name) { this.name = name; } }',
+            'import React from \'react\';',
+            'const result = await fetchData();',
+            'try { riskyOperation(); } catch (error) { handleError(error); }'
+        ],
+        th: [
+            'function calculateSum(a, b) { return a + b; }',
+            'const array = [1, 2, 3, 4, 5];',
+            'if (condition) { doSomething(); }',
+            'for (let i = 0; i < 10; i++) { console.log(i); }',
+            'class Person { constructor(name) { this.name = name; } }',
+            'import React from \'react\';',
+            'const result = await fetchData();',
+            'try { riskyOperation(); } catch (error) { handleError(error); }'
+        ]
+    }
 };
 
 // 사운드 관리
@@ -274,7 +578,8 @@ class TypingEngine {
     }
 
     initializeSession(category, level) {
-        const texts = PRACTICE_TEXTS[category] || PRACTICE_TEXTS.basic;
+        const currentLang = languageManager?.currentLang || 'ko';
+        const texts = PRACTICE_TEXTS[category]?.[currentLang] || PRACTICE_TEXTS.basic[currentLang] || PRACTICE_TEXTS.basic.ko;
         this.currentText = texts[Math.floor(Math.random() * texts.length)];
         this.currentIndex = 0;
         this.startTime = null;
