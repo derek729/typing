@@ -1345,7 +1345,26 @@
 
                         <!-- 텍스트 표시 영역 -->
                         <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                            <div id="practiceText" class="typing-text text-gray-800"></div>
+                            <div id="practiceText" class="typing-text text-gray-800 text-2xl leading-relaxed"></div>
+                            <div id="typingFeedback" class="text-2xl mt-2 opacity-0 transition-opacity duration-300"></div>
+                        </div>
+
+                        <!-- 실시간 통계 -->
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl mb-6">
+                            <div class="flex justify-around text-center">
+                                <div>
+                                    <div id="wpmDisplay" class="text-2xl font-bold text-blue-600">WPM: 0</div>
+                                    <div class="text-sm text-gray-600">타자 속도</div>
+                                </div>
+                                <div>
+                                    <div id="accuracyDisplay" class="text-2xl font-bold text-green-600">정확도: 100%</div>
+                                    <div class="text-sm text-gray-600">정확도</div>
+                                </div>
+                                <div>
+                                    <div id="timerDisplay" class="text-2xl font-bold text-purple-600">00:00</div>
+                                    <div class="text-sm text-gray-600">시간</div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 입력 영역 -->
@@ -2051,21 +2070,7 @@
         </div>
     </div>
 
-    <!-- Core functionality first -->
-    <script src="core.js"></script>
-
-    <!-- Full functionality (will load after core) -->
-    <script>
-        // Load full script after core is ready
-        window.addEventListener('load', function() {
-            console.log('Loading full OpenTyping functionality...');
-            const fullScript = document.createElement('script');
-            fullScript.src = 'script.js';
-            fullScript.onerror = function() {
-                console.log('Full script failed to load, using core functionality only');
-            };
-            document.body.appendChild(fullScript);
-        });
-    </script>
+    <!-- Clean Korean typing functionality -->
+    <script src="script-clean.js"></script>
 </body>
 </html>
