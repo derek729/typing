@@ -575,6 +575,30 @@ class TypingEngine {
         this.startTime = null;
         this.errors = 0;
         this.correctChars = 0;
+
+        // 고급 기능을 위한 추가 속성
+        this.keyPressTimes = [];
+        this.keyFrequency = {};
+        this.errorPatterns = [];
+        this.wpmHistory = [];
+        this.accuracyHistory = [];
+        this.keystrokes = [];
+        this.lastMeasureTime = null;
+        this.sessionWords = [];
+        this.currentWord = '';
+        this.wordStartTime = null;
+
+        // 키보드 히트맵 데이터
+        this.keyboardHeatmap = {};
+        this.fingerUsage = {};
+
+        // 실시간 피드백
+        this.realtimeFeedback = {
+            wpm: 0,
+            accuracy: 100,
+            consistency: 0,
+            topSpeed: 0
+        };
     }
 
     initializeSession(category, level) {
@@ -638,23 +662,36 @@ class TypingEngine {
     handleInput(input) {
         if (AppState.currentSession.isPaused || !AppState.currentSession.startTime) return;
 
-        const currentChar = this.currentText[this.currentIndex];
+        const currentTime = Date.now();
         const typedChar = input[input.length - 1];
+        const currentChar = this.currentText[this.currentIndex];
 
-        if (typedChar === currentChar) {
+        // 키 입력 데이터 기록
+        this.recordKeystroke(currentChar, typedChar, currentTime);
+
+        const isCorrect = typedChar === currentChar;
+
+        if (isCorrect) {
             this.correctChars++;
             this.currentIndex++;
             this.soundManager.play('correct');
             this.highlightKey(typedChar);
+            this.updateKeyboardHeatmap(typedChar, true);
         } else if (typedChar) {
             this.errors++;
             this.soundManager.play('error');
             this.shakeElement(input);
+            this.recordErrorPattern(currentChar, typedChar);
+            this.updateKeyboardHeatmap(typedChar, false);
         }
+
+        // 단어 추적
+        this.trackWordProgress(typedChar, isCorrect);
 
         input.value = '';
         this.updateDisplay();
-        this.updateStats();
+        this.updateAdvancedStats();
+        this.updateRealtimeFeedback();
 
         if (this.currentIndex >= this.currentText.length) {
             this.completeSession();
@@ -912,6 +949,356 @@ class TypingEngine {
         setTimeout(() => {
             element.style.animation = '';
         }, 500);
+    }
+
+    // 고급 기능 메소드들
+
+    // 키스트로크 기록
+    recordKeystroke(expectedChar, actualChar, timestamp) {
+        this.keystrokes.push({
+            expected: expectedChar,
+            actual: actualChar,
+            timestamp: timestamp,
+            correct: expectedChar === actualChar
+        });
+
+        // 키 주기 기록
+        if (this.lastMeasureTime) {
+            const interval = timestamp - this.lastMeasureTime;
+            this.keyPressTimes.push(interval);
+        }
+        this.lastMeasureTime = timestamp;
+
+        // 키 빈도수 기록
+        if (!this.keyFrequency[actualChar]) {
+            this.keyFrequency[actualChar] = 0;
+        }
+        this.keyFrequency[actualChar]++;
+    }
+
+    // 오류 패턴 기록
+    recordErrorPattern(expected, actual) {
+        this.errorPatterns.push({
+            expected: expected,
+            actual: actual,
+            timestamp: Date.now(),
+            position: this.currentIndex
+        });
+
+        // 최근 100개 오류 패턴만 유지
+        if (this.errorPatterns.length > 100) {
+            this.errorPatterns.shift();
+        }
+    }
+
+    // 키보드 히트맵 업데이트
+    updateKeyboardHeatmap(key, isCorrect) {
+        if (!this.keyboardHeatmap[key]) {
+            this.keyboardHeatmap[key] = { correct: 0, incorrect: 0 };
+        }
+
+        if (isCorrect) {
+            this.keyboardHeatmap[key].correct++;
+        } else {
+            this.keyboardHeatmap[key].incorrect++;
+        }
+
+        // 히트맵 UI 업데이트
+        this.updateHeatmapUI();
+    }
+
+    // 히트맵 UI 업데이트
+    updateHeatmapUI() {
+        const heatmapElement = document.getElementById('keyboardHeatmap');
+        if (!heatmapElement) return;
+
+        heatmapElement.innerHTML = Object.entries(this.keyboardHeatmap)
+            .map(([key, data]) => {
+                const total = data.correct + data.incorrect;
+                const accuracy = total > 0 ? (data.correct / total) * 100 : 0;
+                const intensity = Math.min(total / 10, 1); // 최대 10회에서 최대 강도
+                const color = accuracy > 90 ? '#10b981' : accuracy > 70 ? '#f59e0b' : '#ef4444';
+
+                return `
+                    <div class="heatmap-key" style="
+                        background-color: ${color}33;
+                        border: 2px solid ${color};
+                        opacity: ${0.3 + intensity * 0.7};
+                    ">
+                        ${key}
+                        <div class="heatmap-stats">${total} (${accuracy.toFixed(0)}%)</div>
+                    </div>
+                `;
+            })
+            .join('');
+    }
+
+    // 단어 진행률 추적
+    trackWordProgress(char, isCorrect) {
+        if (char === ' ') {
+            // 단어 완료
+            if (this.currentWord.length > 0) {
+                const wordTime = this.wordStartTime ? Date.now() - this.wordStartTime : 0;
+                this.sessionWords.push({
+                    word: this.currentWord,
+                    time: wordTime,
+                    correct: isCorrect
+                });
+            }
+            this.currentWord = '';
+            this.wordStartTime = Date.now();
+        } else {
+            if (this.currentWord === '') {
+                this.wordStartTime = Date.now();
+            }
+            this.currentWord += char;
+        }
+    }
+
+    // 고급 통계 업데이트
+    updateAdvancedStats() {
+        const currentTime = Date.now();
+        const elapsed = (currentTime - AppState.currentSession.startTime) / 1000 / 60; // 분
+
+        if (elapsed > 0) {
+            // 실시간 WPM 계산
+            const currentWPM = Math.round((this.correctChars / 5) / elapsed);
+            this.wpmHistory.push(currentWPM);
+
+            // 실시간 정확도 계산
+            const totalTyped = this.correctChars + this.errors;
+            const currentAccuracy = totalTyped > 0 ? (this.correctChars / totalTyped) * 100 : 100;
+            this.accuracyHistory.push(currentAccuracy);
+
+            // 일관성 계산
+            const consistency = this.calculateConsistency();
+
+            // 최고 속도 갱신
+            if (currentWPM > this.realtimeFeedback.topSpeed) {
+                this.realtimeFeedback.topSpeed = currentWPM;
+            }
+
+            // 실시간 피드백 업데이트
+            this.realtimeFeedback.wpm = currentWPM;
+            this.realtimeFeedback.accuracy = currentAccuracy;
+            this.realtimeFeedback.consistency = consistency;
+        }
+    }
+
+    // 타이핑 일관성 계산
+    calculateConsistency() {
+        if (this.keyPressTimes.length < 10) return 100;
+
+        const recentTimes = this.keyPressTimes.slice(-20);
+        const average = recentTimes.reduce((sum, time) => sum + time, 0) / recentTimes.length;
+        const variance = recentTimes.reduce((sum, time) => sum + Math.pow(time - average, 2), 0) / recentTimes.length;
+        const standardDeviation = Math.sqrt(variance);
+
+        // 표준편차가 작을수록 일관성 높음 (0-100 스케일)
+        const consistency = Math.max(0, 100 - (standardDeviation / average) * 100);
+        return Math.round(consistency);
+    }
+
+    // 실시간 피드백 업데이트
+    updateRealtimeFeedback() {
+        const feedbackElement = document.getElementById('realtimeFeedback');
+        if (!feedbackElement) return;
+
+        feedbackElement.innerHTML = `
+            <div class="feedback-item">
+                <span class="label">속도</span>
+                <span class="value ${this.getSpeedClass()}">${this.realtimeFeedback.wpm} WPM</span>
+            </div>
+            <div class="feedback-item">
+                <span class="label">정확도</span>
+                <span class="value ${this.getAccuracyClass()}">${this.realtimeFeedback.accuracy.toFixed(1)}%</span>
+            </div>
+            <div class="feedback-item">
+                <span class="label">일관성</span>
+                <span class="value ${this.getConsistencyClass()}">${this.realtimeFeedback.consistency}%</span>
+            </div>
+            <div class="feedback-item">
+                <span class="label">최고 속도</span>
+                <span class="value highlight">${this.realtimeFeedback.topSpeed} WPM</span>
+            </div>
+        `;
+    }
+
+    // 속도 등급 클래스
+    getSpeedClass() {
+        const wpm = this.realtimeFeedback.wpm;
+        if (wpm < 30) return 'slow';
+        if (wpm < 60) return 'medium';
+        if (wpm < 90) return 'fast';
+        return 'expert';
+    }
+
+    // 정확도 등급 클래스
+    getAccuracyClass() {
+        const accuracy = this.realtimeFeedback.accuracy;
+        if (accuracy < 85) return 'poor';
+        if (accuracy < 95) return 'good';
+        return 'excellent';
+    }
+
+    // 일관성 등급 클래스
+    getConsistencyClass() {
+        const consistency = this.realtimeFeedback.consistency;
+        if (consistency < 70) return 'poor';
+        if (consistency < 85) return 'good';
+        return 'excellent';
+    }
+
+    // 자세 분석 및 피드백
+    analyzeTypingPattern() {
+        if (this.keystrokes.length < 20) return null;
+
+        const analysis = {
+            avgKeyInterval: 0,
+            problemKeys: [],
+            rhythm: 'stable',
+            suggestions: []
+        };
+
+        // 평균 키 간격
+        if (this.keyPressTimes.length > 0) {
+            analysis.avgKeyInterval = this.keyPressTimes.reduce((sum, time) => sum + time, 0) / this.keyPressTimes.length;
+        }
+
+        // 문제 키 분석
+        Object.entries(this.keyboardHeatmap).forEach(([key, data]) => {
+            const total = data.correct + data.incorrect;
+            const accuracy = total > 0 ? (data.correct / total) * 100 : 100;
+
+            if (accuracy < 80 && total > 3) {
+                analysis.problemKeys.push({ key, accuracy, frequency: total });
+            }
+        });
+
+        // 리듬 분석
+        const recentTimes = this.keyPressTimes.slice(-10);
+        if (recentTimes.length > 5) {
+            const variance = this.calculateVariance(recentTimes);
+            analysis.rhythm = variance > 100 ? 'irregular' : 'regular';
+        }
+
+        // 개선 제안 생성
+        analysis.suggestions = this.generateSuggestions(analysis);
+
+        return analysis;
+    }
+
+    // 분산 계산
+    calculateVariance(values) {
+        const average = values.reduce((sum, val) => sum + val, 0) / values.length;
+        return values.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) / values.length;
+    }
+
+    // 개선 제안 생성
+    generateSuggestions(analysis) {
+        const suggestions = [];
+
+        if (analysis.problemKeys.length > 0) {
+            suggestions.push(`${analysis.problemKeys.map(p => p.key).join(', ')} 키 연습이 필요합니다.`);
+        }
+
+        if (analysis.rhythm === 'irregular') {
+            suggestions.push('일정한 리듬으로 타이핑하는 연습을 하세요.');
+        }
+
+        if (analysis.avgKeyInterval > 200) {
+            suggestions.push('키 입력 속도를 높여보세요.');
+        }
+
+        if (this.realtimeFeedback.accuracy < 90) {
+            suggestions.push('정확성을 우선으로 생각하고 연습하세요.');
+        }
+
+        return suggestions;
+    }
+
+    // 세션 완료 시 고급 분석 리포트
+    generateAdvancedReport() {
+        const report = {
+            basicStats: {
+                wpm: this.realtimeFeedback.wpm,
+                accuracy: this.realtimeFeedback.accuracy,
+                time: AppState.currentSession.startTime ?
+                    (Date.now() - AppState.currentSession.startTime) / 1000 / 60 : 0,
+                totalChars: this.correctChars + this.errors
+            },
+            detailedAnalysis: this.analyzeTypingPattern(),
+            heatmap: this.keyboardHeatmap,
+            errorPatterns: this.errorPatterns.slice(-10),
+            wordStats: this.analyzeWordStats(),
+            recommendations: this.generatePersonalizedRecommendations()
+        };
+
+        return report;
+    }
+
+    // 단어 통계 분석
+    analyzeWordStats() {
+        if (this.sessionWords.length === 0) return null;
+
+        const totalTime = this.sessionWords.reduce((sum, word) => sum + word.time, 0);
+        const avgTime = totalTime / this.sessionWords.length;
+        const correctWords = this.sessionWords.filter(w => w.correct).length;
+
+        return {
+            totalWords: this.sessionWords.length,
+            avgTimePerWord: avgTime,
+            accuracy: (correctWords / this.sessionWords.length) * 100,
+            slowestWord: this.sessionWords.reduce((max, word) => word.time > max.time ? word : max),
+            fastestWord: this.sessionWords.reduce((min, word) => word.time < min.time ? word : min)
+        };
+    }
+
+    // 개인화된 추천 생성
+    generatePersonalizedRecommendations() {
+        const recommendations = [];
+        const analysis = this.analyzeTypingPattern();
+
+        if (!analysis) return recommendations;
+
+        // WPM 기반 추천
+        if (this.realtimeFeedback.wpm < 30) {
+            recommendations.push({
+                type: 'speed',
+                title: '기초 속도 훈련',
+                description: '기본 키 위치 익히기 연습을 집중적으로 하세요.',
+                exercise: 'basic'
+            });
+        } else if (this.realtimeFeedback.wpm > 80) {
+            recommendations.push({
+                type: 'advanced',
+                title: '고급 기술 도전',
+                description: '복잡한 문자와 기호 조합 연습을 추천합니다.',
+                exercise: 'programming'
+            });
+        }
+
+        // 정확도 기반 추천
+        if (this.realtimeFeedback.accuracy < 85) {
+            recommendations.push({
+                type: 'accuracy',
+                title: '정확성 향상',
+                description: '천천히 정확하게 타이핑하는 연습이 필요합니다.',
+                exercise: 'accuracy'
+            });
+        }
+
+        // 문제 키 기반 추천
+        if (analysis.problemKeys.length > 0) {
+            recommendations.push({
+                type: 'practice',
+                title: '취약 키 보강',
+                description: `${analysis.problemKeys.map(p => p.key).join(', ')} 키 특별 훈련`,
+                exercise: 'custom'
+            });
+        }
+
+        return recommendations;
     }
 }
 
