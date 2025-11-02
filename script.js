@@ -3192,45 +3192,6 @@ function isMobileDevice() {
            (navigator.maxTouchPoints > 0 && /MacIntel/.test(navigator.platform));
 }
 
-// DOM 로드 시 애플리케이션 초기화
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('OpenTyping Pro: DOM 로드 완료');
-
-    // 모바일 디바이스 감지
-    if (isMobileDevice()) {
-        console.log('OpenTyping Pro: 모바일 디바이스 감지');
-        document.body.classList.add('mobile-device');
-
-        // 모바일 최적화
-        optimizeForMobile();
-    }
-
-    try {
-        app = new OpenTypingApp();
-        typingEngine = app.typingEngine;
-        virtualKeyboard = typingEngine.virtualKeyboard;
-        console.log('OpenTyping Pro: 애플리케이션 초기화 성공');
-
-        // PWA 상태 확인
-        if ('standalone' in window.navigator && window.navigator.standalone) {
-            console.log('OpenTyping Pro: PWA standalone 모드 실행');
-            document.body.classList.add('pwa-standalone');
-        }
-
-        // 초기 로드 메시지
-        setTimeout(() => {
-            console.log('OpenTyping Pro: 모든 기능 준비 완료');
-
-            // 첫 방문 환영 메시지
-            if (!localStorage.getItem('visited')) {
-                showWelcomeMessage();
-                localStorage.setItem('visited', 'true');
-            }
-        }, 1000);
-    } catch (error) {
-        console.error('OpenTyping Pro: 초기화 오류', error);
-    }
-});
 
 // 모바일 최적화 함수
 function optimizeForMobile() {
@@ -3773,7 +3734,7 @@ class ChatBotManager {
                     '🏆 Recommendations based on your current level:\n\n🌱 Beginner: a s d f j k l; basic practice\n🌿 Intermediate: Short sentence typing\n🌳 Advanced: Long texts and specialized terms\n🚀 Expert: Code and symbol typing\n\n\nLet me know your current level for more precise recommendations!',
                     '🎯 Today\'s recommended course:\n\n📚 [Basic] Finger position mastery (10min)\n⚡ [Speed] Fast repetition practice (15min)\n🎯 [Accuracy] Focused typing (10min)\n🔄 [Review] Full content review (5min)\n\nReady to start?'
                 ]
-            ]
+            }
         };
 
         const langResponses = responses[language] || responses.ko;
@@ -5700,6 +5661,28 @@ function likePost(postId) {
 
 // DOM 로드 시 모든 시스템 초기화
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('OpenTyping Pro: DOM 로드 완료');
+
+    // 모바일 디바이스 감지
+    if (isMobileDevice()) {
+        console.log('OpenTyping Pro: 모바일 디바이스 감지');
+        document.body.classList.add('mobile-device');
+        optimizeForMobile();
+    }
+
+    // 앱 초기화 (가장 먼저)
+    try {
+        app = new OpenTypingApp();
+        console.log('OpenTyping Pro: 메인 애플리케이션 초기화 성공');
+
+        // 앱 인스턴스를 전역 변수에 할당
+        window.app = app;
+        window.typingEngine = app.typingEngine;
+
+    } catch (error) {
+        console.error('OpenTyping Pro: 애플리케이션 초기화 오류', error);
+    }
+
     // 다국어 시스템 초기화
     languageManager = new LanguageManager();
 
@@ -5724,4 +5707,9 @@ document.addEventListener('DOMContentLoaded', () => {
             chatBotManager.showTypingTip();
         }
     }, 60000); // 1분마다 확인
+
+    // 환영 메시지 표시
+    setTimeout(() => {
+        showWelcomeMessage();
+    }, 1000);
 });

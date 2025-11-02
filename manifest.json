@@ -11,21 +11,21 @@
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNCIgZmlsbD0iIzRGNDZFNSIvPgo8c3ZnIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHg9IjgiIHk9IjgiPgo8cmVjdCB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHJ4PSIyIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIGQ9Ik00LjY2NyA2LjY2N0g1LjMzM1Y2SDQuNjY3VjYuNjY3Wk02LjY2NyA2LjY2N0g3LjMzM1Y2SDYuNjY3VjYuNjY3Wk04LjY2NyA2LjY2N0g5LjMzM1Y2SDguNjY3VjYuNjY3Wk0zLjMzMyA4SDQuNjY3VjdIMy4zM1Y4Wk02LjY2NyA4SDguVjdINi42NjdWOEg5LjMzM1Y3SDEwLjY2N1Y4SDkuMzMzWk0zLjMzMyA5LjMzM0g0LjY2N1Y4LjY2N0gzLjMzM1Y5LjMzM1pNNi42NjcgOS4zMzMgRDguNjY3VjguNjY3SDYuNjY3VjkuMzMzWk0xMC42NjcgOS4zMzMgQDExLjMzM1Y4LjY2N0gxMC42NjdWOS4zMzNaTTQuNjY3IDEwLjY2N0g1LjMzM1YxMC4wSDQuNjY3VjEwLjY2N1pNNi42NjcgMTAuNjY3SDcuMzMzVjEwLjY2N0g2LjY2N1YxMC42NjdaTTguNjY3IDEwLjY2N0g5LjMzM1YxMC4wSDguNjY3VjEwLjY2N1pNMTAuNjY3IDEwLjY2N0gxMS4zMzMgQjEwLjY2N1YxMC42NjdaWiIgZmlsbD0iIzRGNDZFNSIvPgo8L3N2Zz4KPC9zdmc+",
+            "src": "https://via.placeholder.com/32/4F46E5/FFFFFF?text=OT",
             "sizes": "32x32",
-            "type": "image/svg+xml",
+            "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiM0RjQ2RTUiLz4KPHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0OCIgeT0iNDgiPgo8cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIxMiIgZmlsbD0iI0ZGRkZGRiIvPgo8cGF0aCBkPSJNMjggNDBIMzJWMzZIMjhWNDBaTTQwIDQwSDQ0VjM2SDQwVjQwWk01MiA0MEg1NlYzNkg1MlY0MFpNNjQgNDBINjhWMzZINjRWNDBaTTIwIDQ4SDI0VjQ0SDIwVjQ4Wk0zMiA0OEgzNlY0NEgzMlY0OFpNNDQgNDgINDhWNDhINDRWNDhaTTU2IDQ4SDYwVjQ0SDU2VjQ4Wk02OCA0OEg3MlY0NEg2OFY0OFpNMjggNTZIMzJWNTJIMjhWNTZaTTQwIDU2SDQ0VjUySDQwVjU2Wk01MiA1Nkg1NlY1Mkg1MlY1Nlo2NCA1Nkg2OFY1Mkg2NFY1NloiIGZpbGw9IiM0RjQ2RTUiLz4KPC9zdmc+Cjwvc3ZnPgo=",
+            "src": "https://via.placeholder.com/192/4F46E5/FFFFFF?text=OT",
             "sizes": "192x192",
-            "type": "image/svg+xml",
+            "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUxMiA1MTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iNjQiIGZpbGw9IiM0RjQ2RTUiLz4KPHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgdmlld0JveD0iMCAwIDI1NiAyNTYiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMTI4IiB5PSIxMjgiPgo8cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgcng9IjMyIiBmaWxsPSIjRkZGRkZGIi8+CjxwYXRoIGQ9Ik03NCAxMDgIODhWMTAwSDc0VjEwOFpNMTA0IDEwOEgxMTZWMTAwSDEwNFYxMDhaTTEzNCAxMDhIMTQ4VjEwMEgxMzRWMTA4Wk0xNjQgMTA4SDE3OFYxMDBIMTY0VjEwOFpNNDggMTMySDU2VjEyMEg0OFYxMzJaTTgwIDEzMjw4VjEyMEg4MFYxMzJaTDk2IDEzMkgxMDRWMTIwSDk2VjEzMlopTTEyMCAxMzJIMTI4VjEyMEgxMjBWMTMyWk0xNDQgMTMySDE1MlYxMjBIMTQ0VjEzMlopTTE2MCAxMzJIMTY4VjEyMEgxNjBWMTMyWk0xNzYgMTMySDE4NFYxMjBIMTc2VjEzMlopTTEwNCAxNTZIMTEyVjE0OEgxMDRWMTU2Wk0xMzAgMTU2SDEzOFYxNDggSDEzMFYxNTZaTTE1NiAxNTZIMTY0VjE0OEgxNTZWMTU2Wk03NCAxODAINzhWMTcySDc0VjE4MFpNMTA0IDE4MEgxMTZWMTcySDEwNFYxODBaTTEzNCAxODBIMTQ4VjE3MkgxMzRWMTgwWk0xNjQgMTgwSDE3OFYxNzJIMTY0VjE4MFoiIGZpbGw9IiM0RjQ2RTUiLz4KPC9zdmc+Cjwvc3ZnPgo=",
+            "src": "https://via.placeholder.com/512/4F46E5/FFFFFF?text=OT",
             "sizes": "512x512",
-            "type": "image/svg+xml",
+            "type": "image/png",
             "purpose": "any maskable"
         }
     ],
@@ -50,7 +50,7 @@
             "url": "/?action=practice",
             "icons": [
                 {
-                    "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjQiIGN5PSIyNCIgcj0iMjQiIGZpbGw9IiMxMEI5ODEiLz4KPHRleHQgeD0iMjQiIHk9IjI4IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7so7w8L3RleHQ+Cjwvc3ZnPg==",
+                    "src": "https://via.placeholder.com/48/10B981/FFFFFF?text=P",
                     "sizes": "48x48"
                 }
             ]
