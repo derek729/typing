@@ -1440,11 +1440,229 @@ class OpenTypingApp {
         if (accuracyElement) accuracyElement.textContent = stats.avgAccuracy + '%';
         if (timeElement) timeElement.textContent = Math.floor(stats.totalTime / 60) + '시간';
         if (scoreElement) scoreElement.textContent = stats.totalScore.toLocaleString();
+
+        // 추가 통계 업데이트
+        this.updateDailyProgress();
+        this.updateWeeklyGoals();
+        this.updateLeaderboard();
+        this.updateRecentActivities();
+        this.updateAchievementBadges();
     }
 
     updateCommunityContent() {
         // 커뮤니티 콘텐츠 업데이트
         // 게시판, 랭킹 등 동적 콘텐츠 로드
+    }
+
+    // 일일 진행률 업데이트
+    updateDailyProgress() {
+        const today = new Date().toDateString();
+        const stored = localStorage.getItem('dailyProgress_' + today);
+        let progress = stored ? JSON.parse(stored) : {
+            practiceTime: 0,
+            wpmProgress: [],
+            accuracyProgress: [],
+            completedExercises: 0,
+            dailyGoal: 30 // 분
+        };
+
+        const progressBar = document.getElementById('dailyProgress');
+        const progressText = document.getElementById('dailyProgressText');
+
+        if (progressBar && progressText) {
+            const percentage = Math.min((progress.practiceTime / progress.dailyGoal) * 100, 100);
+            progressBar.style.width = percentage + '%';
+            progressText.textContent = `${Math.floor(percentage)}% (${progress.practiceTime}/${progress.dailyGoal}분)`;
+        }
+    }
+
+    // 주간 목표 업데이트
+    updateWeeklyGoals() {
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        const weekKey = 'weekly_' + weekStart.toDateString();
+
+        let weeklyData = localStorage.getItem(weekKey);
+        let weekly = weeklyData ? JSON.parse(weeklyData) : {
+            totalMinutes: 0,
+            avgWPM: 0,
+            bestWPM: 0,
+            exercises: 0,
+            goals: {
+                practiceTime: 150, // 2.5시간
+                avgWPM: 70,
+                exercises: 20
+            }
+        };
+
+        const goalsContainer = document.getElementById('weeklyGoals');
+        if (goalsContainer) {
+            goalsContainer.innerHTML = `
+                <div class="goal-item">
+                    <span>연습 시간</span>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${Math.min((weekly.totalMinutes/weekly.goals.practiceTime)*100, 100)}%"></div>
+                    </div>
+                    <span>${weekly.totalMinutes}/${weekly.goals.practiceTime}분</span>
+                </div>
+                <div class="goal-item">
+                    <span>평균 WPM</span>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${Math.min((weekly.avgWPM/weekly.goals.avgWPM)*100, 100)}%"></div>
+                    </div>
+                    <span>${weekly.avgWPM}/${weekly.goals.avgWPM}</span>
+                </div>
+                <div class="goal-item">
+                    <span>완료 연습</span>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: ${Math.min((weekly.exercises/weekly.goals.exercises)*100, 100)}%"></div>
+                    </div>
+                    <span>${weekly.exercises}/${weekly.goals.exercises}</span>
+                </div>
+            `;
+        }
+    }
+
+    // 리더보드 업데이트
+    updateLeaderboard() {
+        const leaderboardContainer = document.getElementById('leaderboard');
+        if (!leaderboardContainer) return;
+
+        // 실제 앱에서는 서버에서 데이터 가져오기
+        const mockLeaderboard = [
+            { rank: 1, username: '타자마스터', wpm: 142, accuracy: 98.5, score: 15420 },
+            { rank: 2, username: 'KeyboardKing', wpm: 138, accuracy: 97.8, score: 14890 },
+            { rank: 3, username: 'SwiftFingers', wpm: 135, accuracy: 98.2, score: 14230 },
+            { rank: 4, username: 'SpeedDemon', wpm: 132, accuracy: 96.9, score: 13980 },
+            { rank: 5, username: 'PerfectTypist', wpm: 128, accuracy: 99.1, score: 13560 }
+        ];
+
+        leaderboardContainer.innerHTML = mockLeaderboard.map(user => `
+            <div class="leaderboard-item ${user.username === '사용자' ? 'current-user' : ''}">
+                <span class="rank">#${user.rank}</span>
+                <span class="username">${user.username}</span>
+                <span class="wpm">${user.wpm} WPM</span>
+                <span class="accuracy">${user.accuracy}%</span>
+                <span class="score">${user.score.toLocaleString()}</span>
+            </div>
+        `).join('');
+    }
+
+    // 최근 활동 업데이트
+    updateRecentActivities() {
+        const activitiesContainer = document.getElementById('recentActivities');
+        if (!activitiesContainer) return;
+
+        const activities = this.getRecentActivities();
+
+        activitiesContainer.innerHTML = activities.map(activity => `
+            <div class="activity-item">
+                <div class="activity-icon">${activity.icon}</div>
+                <div class="activity-details">
+                    <div class="activity-title">${activity.title}</div>
+                    <div class="activity-description">${activity.description}</div>
+                    <div class="activity-time">${activity.time}</div>
+                </div>
+                <div class="activity-score">${activity.score}</div>
+            </div>
+        `).join('');
+    }
+
+    // 최근 활동 데이터 가져오기
+    getRecentActivities() {
+        const activities = localStorage.getItem('recentActivities');
+        if (activities) {
+            return JSON.parse(activities);
+        }
+
+        // 기본 활동 데이터
+        return [
+            {
+                icon: '🏆',
+                title: '토너먼트 참여',
+                description: '주말 챔피언십에서 3위 달성',
+                time: '2시간 전',
+                score: '+250 점'
+            },
+            {
+                icon: '⚡',
+                title: '속도 연습',
+                description: '고급 속도 훈련 완료',
+                time: '3시간 전',
+                score: '+120 점'
+            },
+            {
+                icon: '🎯',
+                title: '정확성 챌린지',
+                description: '99% 정확도 기록',
+                time: '5시간 전',
+                score: '+180 점'
+            },
+            {
+                icon: '📚',
+                title: '프로그래밍 연습',
+                description: 'JavaScript 코드 연습 완료',
+                time: '1일 전',
+                score: '+95 점'
+            }
+        ];
+    }
+
+    // 업적 배지 업데이트
+    updateAchievementBadges() {
+        const badgesContainer = document.getElementById('achievementBadges');
+        if (!badgesContainer) return;
+
+        const badges = this.getUserBadges();
+
+        badgesContainer.innerHTML = badges.map(badge => `
+            <div class="badge ${badge.earned ? 'earned' : 'locked'}" title="${badge.description}">
+                <div class="badge-icon">${badge.icon}</div>
+                <div class="badge-name">${badge.name}</div>
+            </div>
+        `).join('');
+    }
+
+    // 사용자 업적 데이터
+    getUserBadges() {
+        return [
+            {
+                icon: '🌟',
+                name: '초보자',
+                description: '첫 번째 연습 완료',
+                earned: true
+            },
+            {
+                icon: '⚡',
+                name: '속도의 달인',
+                description: '100 WPM 달성',
+                earned: true
+            },
+            {
+                icon: '🎯',
+                name: '정확성의 제왕',
+                description: '99% 정확도 달성',
+                earned: false
+            },
+            {
+                icon: '🔥',
+                name: '연습의 귀재',
+                description: '7일 연속 출석',
+                earned: true
+            },
+            {
+                icon: '👑',
+                name: '타자의 왕',
+                description: '150 WPM 달성',
+                earned: false
+            },
+            {
+                icon: '💎',
+                name: '완벽주의자',
+                description: '100% 정확도 달성',
+                earned: false
+            }
+        ];
     }
 
     showPracticeCategory(category) {
