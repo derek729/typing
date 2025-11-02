@@ -1,41 +1,40 @@
 {
-  "name": "question-app-backend",
-  "version": "1.0.0",
-  "description": "QUESTION - AI 사물 스케치 & 이름 찾기 앱 백엔드",
-  "main": "server.js",
+  "name": "opentyping-pro",
+  "version": "2.0.0",
+  "description": "한컴 타자 연습 스타일 온라인 타자 연습 프로그램 - PWA 모바일 최적화",
+  "main": "index.html",
   "scripts": {
-    "start": "expo start --dev-client",
-    "dev": "nodemon server.js",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "echo 'Ready for Vercel deployment'"
   },
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "compression": "^1.7.4",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "expo": "~53.0.9",
-    "expo-camera": "^16.1.6",
-    "expo-image-manipulator": "^13.1.7",
-    "express": "^4.18.2",
-    "express-rate-limit": "^7.1.5",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.3",
-    "multer": "^1.4.5-lts.1",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-kakao": "^1.0.1",
-    "passport-naver": "^1.0.1",
-    "react": "19.0.0",
-    "react-native": "0.79.2",
-    "sharp": "^0.34.2",
-    "expo-status-bar": "~2.2.3",
-    "react-native-safe-area-context": "5.4.0"
+  "keywords": [
+    "typing",
+    "practice",
+    "korean",
+    "keyboard",
+    "education",
+    "game",
+    "wpm",
+    "typing-tutor",
+    "pwa",
+    "mobile"
+  ],
+  "author": "OpenTyping Pro Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/derek729/typing.git"
   },
-  "devDependencies": {
-    "@react-native-community/cli": "latest",
-    "nodemon": "^3.0.2",
-    "@babel/core": "^7.20.0"
-  }
+  "bugs": {
+    "url": "https://github.com/derek729/typing/issues"
+  },
+  "homepage": "https://github.com/derek729/typing",
+  "devDependencies": {},
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
 }
