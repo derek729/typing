@@ -2062,6 +2062,21 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Core functionality first -->
+    <script src="core.js"></script>
+
+    <!-- Full functionality (will load after core) -->
+    <script>
+        // Load full script after core is ready
+        window.addEventListener('load', function() {
+            console.log('Loading full OpenTyping functionality...');
+            const fullScript = document.createElement('script');
+            fullScript.src = 'script.js';
+            fullScript.onerror = function() {
+                console.log('Full script failed to load, using core functionality only');
+            };
+            document.body.appendChild(fullScript);
+        });
+    </script>
 </body>
 </html>
